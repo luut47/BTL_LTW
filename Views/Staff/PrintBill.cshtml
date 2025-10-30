@@ -1,0 +1,44 @@
+﻿@model BTL_LTW.Models.Order
+@{
+    ViewData["Title"] = "Print Bill";
+}
+<div style="max-width:600px;margin:20px auto;font-family:Arial;">
+    <h2>Hoá đơn nhà hàng</h2>
+    <div><strong>Mã đơn:</strong> @Model.TableToken</div>
+    <div><strong>Order id:</strong> @Model.Id</div>
+    <div><strong>Khách:</strong> @Model.CustomerName - @Model.CustomerPhone</div>
+    <div><strong>Địa chỉ:</strong> @Model.CustomerAddress</div>
+    <div><strong>Bàn:</strong> @(Model.AssignedTable ?? "Chưa xếp")</div>
+    <div><strong>Thời gian:</strong> @Model.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</div>
+
+    <hr />
+    <table style="width:100%;border-collapse:collapse;">
+        <thead>
+            <tr>
+                <th style="text-align:left">Món</th>
+                <th>Số</th>
+                <th style="text-align:right">Đơn giá</th>
+                <th style="text-align:right">Thành tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var it in Model.Items)
+            {
+                <tr>
+                    <td>@it.MenuItemName</td>
+                    <td>@it.Qty</td>
+                    <td style="text-align:right">@it.UnitPrice.ToString("N0")</td>
+                    <td style="text-align:right">@((it.UnitPrice * it.Qty).ToString("N0"))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <hr />
+    <div style="text-align:right;font-size:18px;"><strong>Tổng: @Model.Total.ToString("N0") VND</strong></div>
+    <div style="margin-top:12px;">Phương thức thanh toán: @Model.PaymenMethod ?? "Chưa chọn"</div>
+
+    <div style="margin-top:20px;">
+        <button onclick="window.print()">In hoá đơn</button>
+        <a href="/Staff">Quay lại</a>
+    </div>
+</div>

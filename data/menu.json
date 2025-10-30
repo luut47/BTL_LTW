@@ -1,0 +1,57 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Đồ uống",
+      "items": [
+        {
+          "id": 1,
+          "name": "Cà phê sữa",
+          "price": 30000
+        },
+        {
+          "id": 2,
+          "name": "Cà phê đen",
+          "price": 25000
+        },
+        {
+          "id": 3,
+          "name": "Trà đào",
+          "price": 35000
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Đồ khai vị",
+      "items": [
+        {
+          "id": 101,
+          "name": "Khoai tây chiên",
+          "price": 45000
+        },
+        {
+          "id": 102,
+          "name": "Gỏi cuốn",
+          "price": 40000
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Món chính",
+      "items": [
+        {
+          "id": 201,
+          "name": "Cơm sườn",
+          "price": 85000
+        },
+        {
+          "id": 202,
+          "name": "Mì xào hải sản",
+          "price": 95000
+        }
+      ]
+    }
+  ]
+}

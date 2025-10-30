@@ -1,0 +1,52 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+/* đảm bảo body / container có khoảng trống dưới cùng để footer không che nội dung */
+body, main {
+    padding-bottom: 90px; /* điều chỉnh nếu footer cao hơn */
+}
+
+/* style cho popup giỏ / cart bar */
+.cart-fixed {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    bottom: 10px; /* cách dưới 10px — nằm trên footer */
+    z-index: 9999; /* lớn hơn footer */
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* nếu footer có z-index cao, bạn có thể tăng cart z-index lên 10000 */

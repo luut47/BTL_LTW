@@ -1,0 +1,90 @@
+﻿@model List<BTL_LTW.Models.Order>
+@{
+    ViewData["Title"] = "Staff Dashboard";
+    var tables = (List<BTL_LTW.Models.TableInfo>)ViewBag.Tables;
+    var occ = ViewBag.OccupiedCount ?? 0;
+}
+<h2>Staff - Dashboard</h2>
+<p><a href="/Staff/Logout">Logout</a></p>
+<div style="display:flex;gap:18px;">
+    <div style="flex:1;">
+        <h3>Orders (mới nhất)</h3>
+        @foreach (var o in Model)
+        {
+            <div style="border:1px solid #ddd;padding:10px;margin-bottom:8px;">
+                <div>
+                    <strong>Order:</strong> @o.Id &nbsp; <strong>Mã:</strong> @o.TableToken &nbsp; <strong>Trạng thái:</strong> @o.Status
+                </div>
+                <div>Khách: @o.CustomerName - @o.CustomerPhone</div>
+                <div>Địa chỉ: @o.CustomerAddress</div>
+                <div>Thời gian: @o.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</div>
+                <div>
+                    <ul>
+                        @foreach (var it in o.Items)
+                        {
+                            <li>@it.MenuItemName - x@it.Qty - @it.UnitPrice.ToString("N0")</li>
+                        }
+                    </ul>
+                </div>
+                <div><strong>Tổng:</strong> @o.Total.ToString("N0") VND</div>
+
+                <div style="margin-top:8px;">
+                    <form method="post" action="/Staff/AssignTable" style="display:inline-block">
+                        <input type="hidden" name="orderId" value="@o.Id" />
+                        <select name="tableId">
+                            <option value="">--Chọn bàn--</option>
+                            @* render option theo 2 nhánh để tránh chèn C# vào attribute *@
+                            @foreach (var t in tables)
+                            {
+                                // chỉ hiển thị bàn trống hoặc bàn đã được gán cho order đang xử lý
+                                if (!t.IsOccuped || (o.AssignedTable == t.Id))
+                                {
+                                    if (o.AssignedTable == t.Id)
+                                    {
+                                        <option value="@t.Id" selected="selected">@t.Id @(t.IsOccuped ? "(đang có khách)" : "(trống)")</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@t.Id">@t.Id @(t.IsOccuped ? "(đang có khách)" : "(trống)")</option>
+                                    }
+                                }
+                            }
+                        </select>
+                        <button type="submit">Gán bàn</button>
+                    </form>
+
+                    @if (!string.IsNullOrEmpty(o.AssignedTable))
+                    {
+                        <form method="post" action="/Staff/ReleaseTable" style="display:inline-block;margin-left:8px">
+                            <input type="hidden" name="tableId" value="@o.AssignedTable" />
+                            <button type="submit">Giải phóng bàn @o.AssignedTable</button>
+                        </form>
+                    }
+
+                    <a href="/Staff/PrintBill?id=@o.Id" target="_blank" style="margin-left:8px">In bill</a>
+
+                    @if (!o.IsCompleted)
+                    {
+                        <form method="post" action="/Staff/CompleteOrder" style="display:inline-block;margin-left:8px">
+                            <input type="hidden" name="orderId" value="@o.Id" />
+                            <button type="submit">Hoàn thành đơn</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div style="width:320px;">
+        <h3>Danh sách bàn</h3>
+        <div>Số bàn đang ngồi: <strong>@occ</strong></div>
+        <ul>
+            @foreach (var t in tables)
+            {
+                <li>
+                    <strong>@t.Id</strong> - @(t.IsOccuped ? $"Đang dùng (order {t.OccupiedById})" : "Trống")
+                </li>
+            }
+        </ul>
+    </div>
+</div>

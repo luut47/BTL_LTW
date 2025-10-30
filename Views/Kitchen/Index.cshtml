@@ -1,0 +1,94 @@
+﻿@* 
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
+@{
+}
+@model List<BTL_LTW.Models.Order>
+@{
+    ViewData["Title"] = "Kitchen";
+}
+<h2>Kitchen - Orders</h2>
+<div id="orders">
+    @foreach (var o in Model.OrderByDescending(x => x.CreatedAt))
+    {
+        <div style="border:1px solid #ccc;padding:8px;margin-bottom:10px;">
+            <div><strong>Order:</strong> @o.Id - Bàn: @o.TableToken - @o.Status</div>
+            <div>Created: @o.CreatedAt.ToLocalTime()</div>
+            <ul>
+                @foreach (var it in o.Items)
+                {
+                    <li>
+                        @it.MenuItemName - x@it.Qty - <span id="status-@o.Id-@it.MenuItemId">@it.Status</span>
+                        <button onclick="updateStatus('@o.Id', @it.MenuItemId, 'Preparing')">Start</button>
+                        <button onclick="updateStatus('@o.Id', @it.MenuItemId, 'Ready')">Done</button>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+</div>
+
+<script>
+    async function updateStatus(orderId, menuItemId, status){
+        const url = `/Orders/UpdateItemStatus?orderId=${orderId}&menuItemId=${menuItemId}&status=${status}`;
+        const r = await fetch(url, { method: 'PATCH' });
+        if(r.ok){
+            document.getElementById(`status-${orderId}-${menuItemId}`).innerText = status;
+            alert('Cập nhật thành công');
+        } else alert('Lỗi');
+    }
+</script> *@
+
+@model List<BTL_LTW.Models.Order>
+@{
+    ViewData["Title"] = "Kitchen";
+}
+<h2>Kitchen - Orders</h2>
+
+<div id="orders">
+    @foreach (var o in Model.OrderByDescending(x => x.CreatedAt))
+    {
+        <div style="border:1px solid #ccc;padding:8px;margin-bottom:10px;">
+            <div><strong>Order:</strong> @o.Id &nbsp; - &nbsp; <strong>Mã đơn:</strong> @o.TableToken &nbsp; - &nbsp; <strong>@o.Status</strong></div>
+            <div>Created: @o.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</div>
+            <ul>
+                @foreach (var it in o.Items)
+                {
+                    <li>
+                        @it.MenuItemName - x@it.Qty - <span id="status-@o.Id-@it.MenuItemId">@it.Status</span>
+                        <button onclick="updateStatus('@o.Id', @it.MenuItemId, 'Preparing')">Start</button>
+                        <button onclick="updateStatus('@o.Id', @it.MenuItemId, 'Served')">Done</button>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+</div>
+
+<script>
+    async function updateStatus(orderId, menuItemId, status){
+        const url = `/Orders/UpdateItemStatus?orderId=${orderId}&menuItemId=${menuItemId}&status=${status}`;
+        const r = await fetch(url, { method: 'PATCH' });
+        if(r.ok){
+            // cập nhật label nếu tồn tại
+            const el = document.getElementById(`status-${orderId}-${menuItemId}`);
+            if(el) el.innerText = status;
+            alert('Cập nhật thành công');
+            // tùy chọn: reload để lấy trạng thái mới nhất
+            // location.reload();
+        } else {
+            const txt = await r.text();
+            alert('Lỗi: ' + txt);
+        }
+    }
+
+    // Polling: refresh page mỗi 6s để kitchen thấy order mới (nếu muốn)
+    setInterval(()=> {
+        fetch(window.location.href, { headers: { 'X-Requested-With':'XMLHttpRequest' } })
+            .then(()=> {
+                // reload page to keep template simple
+                location.reload();
+            })
+            .catch(()=> { /* ignore */ });
+    }, 6000);
+</script>

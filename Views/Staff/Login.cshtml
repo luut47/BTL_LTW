@@ -1,0 +1,20 @@
+﻿@{
+    ViewData["Title"] = "Staff Login";
+}
+<h2>Staff Login</h2>
+@if (ViewBag.Error != null)
+{
+    <div style="color:red">@ViewBag.Error</div>
+}
+<form method="post" action="/Staff/Login">
+    <div>
+        <input name="username" placeholder="username" />
+    </div>
+    <div style="margin-top:8px;">
+        <input type="password" name="password" placeholder="password" />
+    </div>
+    <div style="margin-top:8px;">
+        <button type="submit">Đăng nhập</button>
+    </div>
+</form>
+<p>Dev credential: staff / staff123</p>
