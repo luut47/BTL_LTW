@@ -13,5 +13,6 @@
 
         public string? AssignedTable { get; set; }
         public string Status { set; get; } = "Pending";
+        public string? LinkOrderId { get; set; }
     }
 }

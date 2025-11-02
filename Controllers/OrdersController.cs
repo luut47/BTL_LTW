@@ -26,13 +26,32 @@ namespace BTL_LTW.Controllers
 
 
         [HttpPost]
-        public IActionResult Create([FromBody] Order? dto)
+        public IActionResult Create([FromBody] Order? dto, [FromQuery] string? reservationId)
         {
-            if (dto == null || dto.Items == null || !dto.Items.Any()) return BadRequest("Chưa order gì");
+            if (dto == null || dto.Items == null || !dto.Items.Any())
+                return BadRequest("Chưa order gì");
 
             try
             {
+                // nếu Order model của bạn có thêm thuộc tính ReservationId thì ưu tiên lấy từ body
+                if (!string.IsNullOrWhiteSpace(dto?.ReservationId))
+                    reservationId = dto.ReservationId;
+
                 var saved = _storage.CreateOrder(dto);
+
+                // Nếu đơn này xuất phát từ 1 reservation -> link lại để Staff/Reservations hiện "In bill/Hoàn tất"
+                if (!string.IsNullOrWhiteSpace(reservationId))
+                {
+                    var reservations = _storage.ReadReservations();     // expose trong IStorage
+                    var r = reservations.FirstOrDefault(x => x.Id == reservationId);
+                    if (r != null)
+                    {
+                        r.LinkOrderId = saved.Id;
+                        r.Status = "Seated"; // hoặc "Ordered" tùy bạn
+                        _storage.SaveReservations(reservations);         // expose trong IStorage
+                    }
+                }
+
                 return CreatedAtAction(nameof(Get), new { id = saved.Id }, saved);
             }
             catch (Exception ex)
@@ -70,5 +89,6 @@ namespace BTL_LTW.Controllers
             };
             return Json(dto);
         }
+
     }
 }

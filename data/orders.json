@@ -1,0 +1,27 @@
+[
+  {
+    "Id": "8d44fa61-de6a-421e-8246-8bfd91bddc2c",
+    "TableToken": "C-DKKW9",
+    "OrderToken": null,
+    "AssignedTable": null,
+    "IsTakeAway": false,
+    "CustomerName": "Mai",
+    "CustomerPhone": "06",
+    "CustomerAddress": "",
+    "Items": [
+      {
+        "MenuItemId": 1,
+        "MenuItemName": "C\u00E0 ph\u00EA s\u1EEFa",
+        "Qty": 1,
+        "UnitPrice": 30000,
+        "Note": "",
+        "Status": "Served"
+      }
+    ],
+    "Total": 30000,
+    "Status": "Completed",
+    "IsCompleted": true,
+    "CreatedAt": "2025-11-02T16:35:02.0311875Z",
+    "PaymenMethod": null
+  }
+]

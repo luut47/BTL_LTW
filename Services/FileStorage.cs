@@ -336,7 +336,7 @@ namespace BTL_LTW.Services
             }
         }
 
-        private void SaveReservations(List<Reservation> list)
+        public void SaveReservations(List<Reservation> list)
         {
             Directory.CreateDirectory(_dataDir);
             System.IO.File.WriteAllText(ReservationsFile,
@@ -388,6 +388,47 @@ namespace BTL_LTW.Services
             System.IO.File.WriteAllText(Path.Combine(_dataDir, "reservations.json"),
                 JsonSerializer.Serialize(resv, _opt));
             return true;
+        }
+        public Order CreateOrderFromReservation(string reservationId, List<(int menuItemId, int qty, string? note)> items)
+        {
+            var reservations = ReadReservations();
+            var r = reservations.FirstOrDefault(x => x.Id == reservationId);
+            if (r == null) throw new InvalidOperationException("Reservation not found");
+
+            if (string.IsNullOrWhiteSpace(r.AssignedTable))
+                throw new InvalidOperationException("Reservation has no assigned table");
+
+            var o = new Order
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                TableToken = r.AssignedTable,            // dùng mã bàn làm token hiển thị
+                CustomerName = r.CustomerName,
+                CustomerPhone = r.Phone,
+                CustomerAddress = r.Email ?? "",
+                CreatedAt = DateTime.UtcNow,
+                IsTakeAway = false,
+                AssignedTable = r.AssignedTable,         // gán bàn ngay từ đầu
+                Status = "Pending",
+                Items = new List<OrderItem>()
+            };
+
+            foreach (var (menuItemId, qty, note) in items)
+            {
+                o.Items.Add(new OrderItem
+                {
+                    MenuItemId = menuItemId,
+                    Qty = Math.Max(1, qty),
+                    Note = note ?? ""
+                });
+            }
+
+            var created = CreateOrder(o);
+
+            r.LinkOrderId = created.Id;
+            r.Status = "Seated"; // hoặc "Ordered" tuỳ bạn
+            SaveReservations(reservations);
+
+            return created;
         }
 
     }

@@ -115,6 +115,36 @@ namespace BTL_LTW.Controllers
             _storage.ReleaseTableByReservation(reservationId);
             return RedirectToAction(nameof(Reservations));
         }
+        public class ReservationOrderItemDto
+        {
+            public int MenuItemId { get; set; }
+            public int Qty { get; set; }
+            public string? Note { get; set; }
+        }
+        public class CreateOrderFromReservationDto
+        {
+            public string ReservationId { get; set; } = "";
+            public List<ReservationOrderItemDto> Items { get; set; } = new();
+        }
+
+        [HttpPost]
+        public IActionResult CreateOrderFromReservation([FromBody] CreateOrderFromReservationDto dto)
+        {
+            if (HttpContext.Session.GetString("isStaff") != "1") return Unauthorized();
+            if (dto == null || string.IsNullOrWhiteSpace(dto.ReservationId) || dto.Items == null || dto.Items.Count == 0)
+                return BadRequest("Thiếu dữ liệu");
+
+            try
+            {
+                var items = dto.Items.Select(x => (x.MenuItemId, Math.Max(1, x.Qty), x.Note)).ToList();
+                var order = _storage.CreateOrderFromReservation(dto.ReservationId, items);
+                return Json(new { ok = true, orderId = order.Id });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
 
     }

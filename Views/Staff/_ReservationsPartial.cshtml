@@ -14,7 +14,8 @@
             <th>Số người</th>
             <th>Ghi chú</th>
             <th>Bàn</th>
-            <th>Hành động</th>
+            <th>Chọn đồ</th>
+            <th>Hóa đơn</th>
         </tr>
     </thead>
     <tbody>
@@ -30,20 +31,9 @@
                 <td>@r.Note</td>
 
                 <td>
-                    @if (!string.IsNullOrEmpty(r.AssignedTable))
-                    {
-                        <span class="badge bg-success">Bàn: @r.AssignedTable</span>
-                    }
-                    else
-                    {
-
-                        <span class="text-muted">Chưa gán</span>
-                    }
-                </td>
-
-                <td>
                     @if (string.IsNullOrEmpty(r.AssignedTable))
                     {
+                        // GÁN BÀN
                         if (freeTables.Any())
                         {
                             <form method="post" action="/Staff/AssignTableReservation" class="d-inline">
@@ -54,7 +44,7 @@
                                         <option value="@t.Id">@t.Id</option>
                                     }
                                 </select>
-                                <button type="submit" class="btn btn-sm btn-primary">Gán bàn</button>
+                                <button class="btn btn-sm btn-primary" type="submit">Gán bàn</button>
                             </form>
                         }
                         else
@@ -65,13 +55,75 @@
                     }
                     else
                     {
-                        <form method="post" action="/Staff/ReleaseTableReservation" class="d-inline">
+                        <span class="badge bg-success">Bàn: @r.AssignedTable</span>
+                        <form method="post" action="/Staff/ReleaseTableReservation" class="d-inline ms-2">
                             <input type="hidden" name="reservationId" value="@r.Id" />
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Hủy gán</button>
+                            <button class="btn btn-sm btn-outline-danger" type="submit">Hủy gán</button>
                         </form>
+                    }
+                </td>
+
+                <td>
+                    @* NÚT CHỌN ĐỒ → /Menu *@
+                    @if (!string.IsNullOrEmpty(r.AssignedTable) && string.IsNullOrEmpty(r.LinkOrderId))
+                    {
+                        <button type="button"
+                                class="btn btn-sm btn-primary choose-food"
+                                data-id="@r.Id"
+                                data-name="@r.CustomerName"
+                                data-phone="@r.Phone"
+                                data-email="@r.Email"
+                                data-table="@r.AssignedTable">
+                          Chọn đồ
+                        </button>
+                    }
+                    else if (!string.IsNullOrEmpty(r.LinkOrderId))
+                    {
+                        <span class="text-muted">Đã có order</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Gán bàn trước</span>
+                    }
+                </td>
+                <td>
+                    @if (!string.IsNullOrEmpty(r.LinkOrderId))
+                    {
+                        <a class="btn btn-sm btn-outline-secondary" target="_blank" href="/Staff/PrintBill?id=@r.LinkOrderId">In bill</a>
+                        <form method="post" action="/Staff/CompletedOrder" class="d-inline">
+                            <input type="hidden" name="id" value="@r.LinkOrderId" />
+                            <button type="submit" class="btn btn-sm btn-success">Hoàn tất</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Chưa có order</span>
                     }
                 </td>
             </tr>
         }
     </tbody>
 </table>
+@section Scripts {
+    <script>
+        // Nút CHỌN ĐỒ → chuyển sang /Menu và nạp sẵn localStorage
+        document.addEventListener('click', function(e){
+          if (!e.target.classList.contains('choose-food')) return;
+          const btn = e.target;
+          const resid = btn.dataset.id;
+          const name  = btn.dataset.name || '';
+          const phone = btn.dataset.phone || '';
+          const email = btn.dataset.email || '';
+          const table = btn.dataset.table || '';
+
+          // Lưu thông tin khách vào localStorage như luồng Home
+          const customer = { name, phone, address: email, token: table };
+          localStorage.setItem('customer', JSON.stringify(customer));
+          localStorage.setItem('currentReservationId', resid);  // để Menu gửi kèm
+          localStorage.removeItem('cart');                      // tuỳ bạn có muốn xoá giỏ cũ
+
+          // Điều hướng tới Menu (khách tự xem & thêm món)
+          window.location.href = '/Menu?res=' + encodeURIComponent(resid);
+        });
+    </script>
+}

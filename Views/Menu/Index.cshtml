@@ -163,59 +163,71 @@
         const panel = document.getElementById('cartPanel');        
         function openPanel(){ panel.style.right = '0'; }           
         function closePanel(){ panel.style.right = '-420px'; }     
-        async function confirmCart(){
+
+
+                async function confirmCart(){
           const cart = getCart();
-          if(!cart || cart.length === 0){ alert('Giỏ rỗng'); return; }
+          if (!cart || cart.length === 0) { alert('Giỏ rỗng'); return; }
 
-          // LẤY THÔNG TIN KHÁCH TỪ LOCALSTORAGE (home đã lưu)
           const cust = getCustomer();
-          const token = (cust && cust.token) ? cust.token : ('C-' + Math.random().toString(36).slice(2,8).toUpperCase());
+          if (!cust || !cust.name || !cust.phone) {
+            alert('Thiếu thông tin khách (tên/số điện thoại). Vui lòng nhập ở trang Home hoặc bấm “Chọn đồ” từ trang Staff/Reservations.');
+            return;
+          }
 
-          // LẤY CỜ MANG VỀ
-          const isTakeaway = document.getElementById('takeawayChk').checked;
+          const token = cust.token ? cust.token : ('C-' + Math.random().toString(36).slice(2,8).toUpperCase());
+          const isTakeaway = !!document.getElementById('takeawayChk')?.checked;
+          const reservationId = localStorage.getItem('currentReservationId') || '';
 
-          // TẠO PAYLOAD GỬI OrdersController.Create([FromBody] Order)
           const payload = {
             tableToken: token,
-            customerName: cust?.name ?? '',
-            customerPhone: cust?.phone ?? '',
-            customerAddress: cust?.address ?? '',
-            isTakeaway: isTakeaway,   // <-- THÊM DÒNG NÀY
+            customerName: cust.name || '',
+            customerPhone: cust.phone || '',
+            customerAddress: cust.address || '',
+            isTakeaway: isTakeaway,
+            // Nếu backend đã thêm Order.ReservationId thì giữ dòng dưới;
+            // nếu backend đọc qua query, dòng này có cũng không sao.
+            reservationId: reservationId || null,
             items: cart.map(i => ({
-              menuItemId: i.menuItemId,            // đúng theo cart bạn đang lưu
+              menuItemId: i.menuItemId,
               qty: i.qty || 1,
-              note: ''                              // thêm note nếu bạn có
+              note: i.note || ''
             }))
           };
 
+          const btn = document.getElementById('confirmCartBtn');
           try {
-            const btn = document.getElementById('confirmCartBtn');
-            btn.disabled = true; btn.innerText = 'Đang gửi...';
+            if (btn) { btn.disabled = true; btn.innerText = 'Đang gửi...'; }
 
-            const resp = await fetch('/Orders/Create', {
+            // Nếu backend chỉ đọc query: thêm ?reservationId=...
+            const url = reservationId
+              ? `/Orders/Create?reservationId=${encodeURIComponent(reservationId)}`
+              : `/Orders/Create`;
+
+            const resp = await fetch(url, {
               method: 'POST',
               headers: { 'Content-Type':'application/json' },
               body: JSON.stringify(payload)
             });
 
-            if(!resp.ok){
+            if (!resp.ok) {
               const text = await resp.text();
               alert('Tạo order thất bại: ' + text);
-              btn.disabled = false; btn.innerText = 'Xác nhận món';
               return;
             }
 
             const data = await resp.json();
             alert('Đã gửi bếp. Mã order: ' + (data.id || 'unknown'));
 
+            // Dọn context
+            localStorage.removeItem('currentReservationId');
             localStorage.removeItem(CART_KEY);
             refreshCartUI();
-            closePanel();
-            btn.disabled = false; btn.innerText = 'Xác nhận món';
-          } catch(err){
+            if (typeof closePanel === 'function') closePanel();
+          } catch (err) {
             alert('Lỗi gửi order: ' + (err.message || err));
-            const btn = document.getElementById('confirmCartBtn');
-            btn.disabled = false; btn.innerText = 'Xác nhận món';
+          } finally {
+            if (btn) { btn.disabled = false; btn.innerText = 'Xác nhận món'; }
           }
         }
 
