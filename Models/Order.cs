@@ -6,7 +6,7 @@
         public string? TableToken { get; set; }
         public string? OrderToken { get; set; }
         public string? AssignedTable { get; set; }
-
+        public bool IsTakeAway { get; set; } = false;
         public string? CustomerName { get; set; }
         public string? CustomerPhone { get; set; }
         public string? CustomerAddress { get; set; }

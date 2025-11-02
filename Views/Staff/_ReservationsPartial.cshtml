@@ -1,0 +1,77 @@
+﻿@model List<BTL_LTW.Models.Reservation>
+@{
+    var tables = ViewBag.Tables as List<BTL_LTW.Models.TableInfo>;
+    var freeTables = tables?.Where(t => !t.IsOccuped).ToList() ?? new List<BTL_LTW.Models.TableInfo>();
+}
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>Thời điểm đặt</th>
+            <th>Khách</th>
+            <th>Điện thoại</th>
+            <th>Email</th>
+            <th>Ngày/giờ đến</th>
+            <th>Số người</th>
+            <th>Ghi chú</th>
+            <th>Bàn</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var r in Model)
+        {
+            <tr>
+                <td>@r.CreatedAt.ToLocalTime():g</td>
+                <td>@r.CustomerName</td>
+                <td>@r.Phone</td>
+                <td>@r.Email</td>
+                <td>@r.DateTime.ToLocalTime():g</td>
+                <td>@r.People</td>
+                <td>@r.Note</td>
+
+                <td>
+                    @if (!string.IsNullOrEmpty(r.AssignedTable))
+                    {
+                        <span class="badge bg-success">Bàn: @r.AssignedTable</span>
+                    }
+                    else
+                    {
+
+                        <span class="text-muted">Chưa gán</span>
+                    }
+                </td>
+
+                <td>
+                    @if (string.IsNullOrEmpty(r.AssignedTable))
+                    {
+                        if (freeTables.Any())
+                        {
+                            <form method="post" action="/Staff/AssignTableReservation" class="d-inline">
+                                <input type="hidden" name="reservationId" value="@r.Id" />
+                                <select name="tableId" class="form-select form-select-sm d-inline-block" style="width:auto;">
+                                    @foreach (var t in freeTables)
+                                    {
+                                        <option value="@t.Id">@t.Id</option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-primary">Gán bàn</button>
+                            </form>
+                        }
+                        else
+                        {
+
+                            <span class="text-danger">Hết bàn trống</span>
+                        }
+                    }
+                    else
+                    {
+                        <form method="post" action="/Staff/ReleaseTableReservation" class="d-inline">
+                            <input type="hidden" name="reservationId" value="@r.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Hủy gán</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -24,22 +24,7 @@ namespace BTL_LTW.Controllers
             return Ok(orders);
         }
 
-        //[HttpPost]
-        //public IActionResult Create([FromBody] Order? dto)
-        //{
-        //    if (dto == null || dto.Items == null || !dto.Items.Any()) return BadRequest("Chưa order gì");
 
-        //    try
-        //    {
-        //        // CreateOrder sẽ validate ids & gán giá
-        //        var saved = _storage.CreateOrder(dto);
-        //        return CreatedAtAction(nameof(Get), new { id = saved.Id }, saved);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //}
         [HttpPost]
         public IActionResult Create([FromBody] Order? dto)
         {
@@ -62,6 +47,28 @@ namespace BTL_LTW.Controllers
             var ok = _storage.UpdateOrderItemStatus(orderId, menuItemId, status);
             if (!ok) return NotFound();
             return Ok();
+        }
+        [HttpGet]
+        public IActionResult Status(string id)
+        {
+            var o = _storage.GetOrder(id);
+            if (o == null) return NotFound();
+
+            var dto = new
+            {
+                id = o.Id,
+                status = o.Status,
+                total = o.Total,
+                isCompleted = o.IsCompleted,
+                items = o.Items.Select(i => new {
+                    i.MenuItemId,
+                    i.MenuItemName,
+                    i.Qty,
+                    i.UnitPrice,
+                    status = i.Status
+                }).ToList()
+            };
+            return Json(dto);
         }
     }
 }

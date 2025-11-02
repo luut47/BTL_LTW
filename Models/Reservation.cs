@@ -10,5 +10,8 @@
         public int People { get; set; } = 2;
         public string Note { get; set; } = "";
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow; 
+
+        public string? AssignedTable { get; set; }
+        public string Status { set; get; } = "Pending";
     }
 }

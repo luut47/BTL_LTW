@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BTL_LTW.Services;
 using BTL_LTW.Models;
+using System.Text.Json;
 
 namespace BTL_LTW.Controllers
 {
@@ -32,11 +33,13 @@ namespace BTL_LTW.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            if (!IsAuthenticated()) return RedirectToAction(nameof(Login));
+            if (HttpContext.Session.GetString("isStaff") != "1")
+                return RedirectToAction(nameof(Login));
+
             var orders = _storage.GetOrders().OrderByDescending(o => o.CreatedAt).ToList();
-            var tables = _storage.GetTables();
-            ViewBag.Tables = tables;
-            ViewBag.OccupiedCount = _storage.GetOccupiedCount();
+            var tables = _storage.GetTables();                   
+            ViewBag.Tables = tables;                              
+            ViewBag.OccupiedCount = tables.Count(t => t.IsOccuped);
             return View(orders);
         }
         [HttpPost]
@@ -66,5 +69,53 @@ namespace BTL_LTW.Controllers
             HttpContext.Session.Remove("isStaff");
             return RedirectToAction(nameof(Login));
         }
+        [HttpGet]
+        [HttpGet]
+        public IActionResult Reservations()
+        {
+            if (HttpContext.Session.GetString("isStaff") != "1")
+                return RedirectToAction(nameof(Login));
+
+            ViewBag.Tables = _storage.GetTables();        // để dropdown có dữ liệu
+            var list = _storage.ReadReservations()
+                               .OrderByDescending(x => x.CreatedAt)
+                               .ToList();
+            return View(list); // dùng view mạnh kiểu: Views/Staff/Reservations.cshtml (model: List<Reservation>)
+        }
+
+        [HttpGet]
+        public IActionResult ReservationsPartial()
+        {
+            if (HttpContext.Session.GetString("isStaff") != "1")
+                return Unauthorized();
+
+            ViewBag.Tables = _storage.GetTables();        // partial cũng cần
+            var list = _storage.ReadReservations()
+                               .OrderByDescending(x => x.CreatedAt)
+                               .ToList();
+            return PartialView("_ReservationsPartial", list);
+        }
+
+        [HttpPost]
+        public IActionResult AssignTableReservation(string reservationId, string tableId)
+        {
+            if (string.IsNullOrWhiteSpace(reservationId) || string.IsNullOrWhiteSpace(tableId))
+                return RedirectToAction(nameof(Reservations));
+
+            _storage.AssignTableReservation(reservationId, tableId);
+            return RedirectToAction(nameof(Reservations));
+        }
+
+        [HttpPost]
+        public IActionResult ReleaseTableReservation(string reservationId)
+        {
+            if (string.IsNullOrWhiteSpace(reservationId))
+                return RedirectToAction(nameof(Reservations));
+
+            _storage.ReleaseTableByReservation(reservationId);
+            return RedirectToAction(nameof(Reservations));
+        }
+
+
     }
 }

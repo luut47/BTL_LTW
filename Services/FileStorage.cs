@@ -202,27 +202,45 @@ namespace BTL_LTW.Services
         private string TableFile => Path.Combine(_dataDir, "tables.json");
         public List<TableInfo> LoadTables()
         {
-            if (!File.Exists(TableFile))
+            Directory.CreateDirectory(_dataDir);
+
+            List<TableInfo> seed()
             {
-                var list = Enumerable.Range(1, 20)
-                            .Select(i => new TableInfo { Id = "A" + i })
-                            .ToList(); File.WriteAllText(TableFile, JsonSerializer.Serialize(list, _opt));
+                // A1..A10, B1..B10 (tuỳ bạn đổi)
+                var list = new List<TableInfo>();
+                for (int i = 1; i <= 10; i++) list.Add(new TableInfo { Id = $"A{i}", IsOccuped = false });
+                for (int i = 1; i <= 10; i++) list.Add(new TableInfo { Id = $"B{i}", IsOccuped = false });
+                SaveTables(list);
                 return list;
             }
+
+            if (!System.IO.File.Exists(TableFile))
+                return seed();
+
             try
             {
-                var txt = File.ReadAllText(TableFile);
+                var txt = System.IO.File.ReadAllText(TableFile);
+                if (string.IsNullOrWhiteSpace(txt)) return seed();
+
                 var list = JsonSerializer.Deserialize<List<TableInfo>>(txt, _opt);
-                return list ?? new List<TableInfo>();
+                if (list == null || list.Count == 0) return seed();
+
+                // đảm bảo các trường mặc định không null
+                foreach (var t in list)
+                    t.IsOccuped = t.IsOccuped; 
+
+                return list;
             }
             catch
             {
-                return new List<TableInfo>();
+                // file hỏng → hồi phục
+                return seed();
             }
         }
         private void SaveTables(List<TableInfo> tables)
         {
-            File.WriteAllText(TableFile, JsonSerializer.Serialize(tables, _opt));
+            Directory.CreateDirectory(_dataDir);
+            System.IO.File.WriteAllText(TableFile, JsonSerializer.Serialize(tables, _opt));
         }
         public List<TableInfo> GetTables()
         {
@@ -236,27 +254,32 @@ namespace BTL_LTW.Services
         }
         public bool AssignTableOrder(string tableID, string orderID)
         {
-            var table = LoadTables();
-            var tab = table.FirstOrDefault(t => string.Equals(t.Id, tableID, StringComparison.OrdinalIgnoreCase));
+            // 1) Lấy đơn để kiểm tra Takeaway
+            var orders = ReadOrders();
+            var o = orders.FirstOrDefault(x => x.Id == orderID);
+            if (o == null) return false;
+
+            // NEW: chặn gán bàn nếu đơn mang về
+            if (o.IsTakeAway) return false; 
+            ;
+
+            // 2) Gán bàn như cũ
+            var tables = LoadTables();
+            var tab = tables.FirstOrDefault(t => string.Equals(t.Id, tableID, StringComparison.OrdinalIgnoreCase));
             if (tab == null) return false;
             if (tab.IsOccuped) return false;
 
             tab.IsOccuped = true;
             tab.OccupiedById = orderID;
             tab.Since = DateTime.UtcNow;
-            SaveTables(table);
+            SaveTables(tables);
 
-            var orders = ReadOrders();
-            var o = orders.FirstOrDefault(x => x.Id == orderID);
-
-            if (o != null)
-            {
-                o.AssignedTable = tableID;
-                o.Status = "Seated";
-                File.WriteAllText(Path.Combine(_dataDir, "orders.json"), JsonSerializer.Serialize(orders, _opt));
-            }
+            o.AssignedTable = tableID;
+            o.Status = "Seated";
+            File.WriteAllText(Path.Combine(_dataDir, "orders.json"), JsonSerializer.Serialize(orders, _opt));
             return true;
         }
+
         public bool releaseTable(string tableID)
         {
             var tables = LoadTables();
@@ -289,5 +312,83 @@ namespace BTL_LTW.Services
             File.WriteAllText(Path.Combine(_dataDir, "orders.json"), JsonSerializer.Serialize(orders, _opt));
             return true;
         }
+        // ==== Reservations (sync) ====
+        private string ReservationsFile => Path.Combine(_dataDir, "reservations.json");
+
+        public List<Reservation> ReadReservations()
+        {
+            Directory.CreateDirectory(_dataDir);
+            if (!System.IO.File.Exists(ReservationsFile))
+            {
+                var empty = new List<Reservation>();
+                System.IO.File.WriteAllText(ReservationsFile,
+                    JsonSerializer.Serialize(empty, _opt));
+                return empty;
+            }
+            try
+            {
+                var txt = System.IO.File.ReadAllText(ReservationsFile);
+                return JsonSerializer.Deserialize<List<Reservation>>(txt, _opt) ?? new List<Reservation>();
+            }
+            catch
+            {
+                return new List<Reservation>();
+            }
+        }
+
+        private void SaveReservations(List<Reservation> list)
+        {
+            Directory.CreateDirectory(_dataDir);
+            System.IO.File.WriteAllText(ReservationsFile,
+                JsonSerializer.Serialize(list, _opt));
+        }
+
+        public bool AssignTableReservation(string reservationId, string tableId)
+        {
+            var resv = ReadReservations();                        // bạn đã có ReadReservations()
+            var r = resv.FirstOrDefault(x => x.Id == reservationId);
+            if (r == null) return false;
+
+            var tables = LoadTables();
+            var tab = tables.FirstOrDefault(t => string.Equals(t.Id, tableId, StringComparison.OrdinalIgnoreCase));
+            if (tab == null) return false;
+            if (tab.IsOccuped) return false;                      // bận rồi
+
+            // chiếm bàn
+            tab.IsOccuped = true;
+            tab.OccupiedById = "RES:" + reservationId;           // phân biệt với Order
+            tab.Since = DateTime.UtcNow;
+            SaveTables(tables);
+
+            // cập nhật reservation
+            r.AssignedTable = tableId;
+            r.Status = "Confirmed";
+            System.IO.File.WriteAllText(Path.Combine(_dataDir, "reservations.json"),
+                JsonSerializer.Serialize(resv, _opt));
+            return true;
+        }
+
+        public bool ReleaseTableByReservation(string reservationId)
+        {
+            var resv = ReadReservations();
+            var r = resv.FirstOrDefault(x => x.Id == reservationId);
+            if (r == null || string.IsNullOrEmpty(r.AssignedTable)) return false;
+
+            var tables = LoadTables();
+            var tab = tables.FirstOrDefault(t => string.Equals(t.Id, r.AssignedTable, StringComparison.OrdinalIgnoreCase));
+            if (tab == null) return false;
+
+            tab.IsOccuped = false;
+            tab.OccupiedById = null;
+            tab.Since = null;
+            SaveTables(tables);
+
+            r.AssignedTable = null;
+            r.Status = "Pending";
+            System.IO.File.WriteAllText(Path.Combine(_dataDir, "reservations.json"),
+                JsonSerializer.Serialize(resv, _opt));
+            return true;
+        }
+
     }
 }

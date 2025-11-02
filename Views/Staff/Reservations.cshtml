@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "Reservations";
+}
+
+<h2 class="mb-3">Danh sách đặt bàn</h2>
+
+<div id="resv-root">Đang tải...</div>
+
+@section Scripts {
+    <script>
+        function reloadResv(){
+          fetch('/Staff/ReservationsPartial', { headers: { 'X-Requested-With':'XMLHttpRequest' }})
+            .then(r => r.text())
+            .then(html => {
+              const el = document.getElementById('resv-root');
+              if (el) el.innerHTML = html;
+            })
+            .catch(err => console.error('reloadResv error', err));
+        }
+
+        // tải lần đầu và sau đó 8s/lần
+        reloadResv();
+        setInterval(reloadResv, 8000);
+    </script>
+}

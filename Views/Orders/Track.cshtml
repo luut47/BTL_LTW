@@ -1,0 +1,63 @@
+﻿@{
+    ViewBag.Title = "Theo dõi đơn";
+    var currentOrderId = (string)ViewBag.OrderId;
+}
+<h2>Theo dõi đơn #@currentOrderId</h2>
+
+<div id="order-summary"></div>
+<div id="order-items"></div>
+
+<script>
+    const orderId = '@currentOrderId';
+    const summaryEl = document.getElementById('order-summary');
+    const itemsEl = document.getElementById('order-items');
+
+    function statusPercent(s) {
+      // map status -> %; sửa theo enum/chuỗi của bạn
+      switch((s || '').toString()) {
+        case 'Pending':    return 25;
+        case 'Preparing':  return 50;
+        case 'Ready':      return 75;
+        case 'Served':     return 100;
+        case 'Completed':  return 100;
+        default:           return 0;
+      }
+    }
+
+    function render(data) {
+      summaryEl.innerHTML = `
+        <div><b>Trạng thái đơn:</b> ${data.status}</div>
+        <div><b>Tổng tiền:</b> ${data.total.toLocaleString()} đ</div>
+        <div class="progress" style="height:10px;margin:6px 0;">
+          <div class="progress-bar" role="progressbar"
+               style="width:${statusPercent(data.status)}%"></div>
+        </div>
+      `;
+
+      itemsEl.innerHTML = data.items.map(it => {
+        const pct = statusPercent(it.status);
+        return `
+          <div style="margin:10px 0;">
+            <div><b>${it.MenuItemName}</b> x${it.Qty} — ${it.status}</div>
+            <div class="progress" style="height:8px;">
+              <div class="progress-bar" role="progressbar" style="width:${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function tick() {
+      fetch('/Orders/Status?id=' + encodeURIComponent(orderId))
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+          render(data);
+          if (data.isCompleted) clearInterval(poller);
+        })
+        .catch(err => console.error('poll error', err));
+    }
+
+    // gọi ngay và lặp 4s/lần
+    tick();
+    const poller = setInterval(tick, 4000);
+</script>

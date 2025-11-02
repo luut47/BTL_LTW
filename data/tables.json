@@ -1,22 +1,32 @@
-{
+[
   {
-    "token": "A1",
-    "name": "Ban A1"
+    "Id": "A1",
+    "IsOccuped": false,
+    "OccupiedById": null,
+    "Since": null
   },
   {
-    "token": "A2",
-    "name": "Ban A2"
+    "Id": "A2",
+    "IsOccuped": false,
+    "OccupiedById": null,
+    "Since": null
   },
   {
-    "token": "A3",
-    "name": "Ban A3"
+    "Id": "A3",
+    "IsOccuped": false,
+    "OccupiedById": null,
+    "Since": null
   },
   {
-    "token": "A4",
-    "name": "Ban A4"
+    "Id": "A4",
+    "IsOccuped": false,
+    "OccupiedById": null,
+    "Since": null
   },
   {
-    "token": "A5",
-    "name": "Ban A5"
+    "Id": "A5",
+    "IsOccuped": false,
+    "OccupiedById": null,
+    "Since": null
   }
-}
+]

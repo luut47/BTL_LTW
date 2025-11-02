@@ -23,5 +23,8 @@ namespace BTL_LTW.Services
         public int GetOccupiedCount();
         public bool AssignTableOrder(string tableID, string orderID);
         public bool MarkOrder(string orderID);
+        List<Reservation> ReadReservations();
+        bool AssignTableReservation(string reservationId, string tableId);
+        bool ReleaseTableByReservation(string reservationId);
     }
 }

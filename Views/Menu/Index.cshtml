@@ -45,10 +45,15 @@
 
     <div id="cartItemsWrap" style="padding:12px; overflow:auto; height:calc(100vh - 180px);">
         <!-- Các item sẽ render ở đây -->
+
     </div>
 
     <div style="padding:12px; border-top:1px solid #eee;">
         <div style="margin-bottom:8px;">Tổng: <strong id="cartTotal">0 VND</strong></div>
+        <label style="user-select:none;">
+            <input type="checkbox" id="takeawayChk" />
+            Mang về (Takeaway)
+        </label>
         <div style="display:flex; gap:8px;">
             <button id="clearCartBtn" class="btn btn-secondary" style="flex:1">Xóa giỏ</button>
             <button id="confirmCartBtn" class="btn btn-primary" style="flex:1">Xác nhận món</button>
@@ -62,23 +67,12 @@
 @section Scripts {
     <script>
         (function(){
-          // --- utility: storage key ---
           const CART_KEY = 'cart';
           const CUSTOMER_KEY = 'customer';
 
-          function getCart(){
-            try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); }
-            catch { return []; }
-          }
-          function saveCart(cart){
-            localStorage.setItem(CART_KEY, JSON.stringify(cart));
-            refreshCartUI();
-          }
-
-          function getCustomer(){
-            try { return JSON.parse(localStorage.getItem(CUSTOMER_KEY) || 'null'); }
-            catch { return null; }
-          }
+          function getCart(){ try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); } catch { return []; } }
+          function saveCart(cart){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); refreshCartUI(); }
+          function getCustomer(){ try { return JSON.parse(localStorage.getItem(CUSTOMER_KEY) || 'null'); } catch { return null; } }
 
           // update floating count & panel total
           function refreshCartUI(){
@@ -166,64 +160,64 @@
               });
             });
           }
+        const panel = document.getElementById('cartPanel');        
+        function openPanel(){ panel.style.right = '0'; }           
+        function closePanel(){ panel.style.right = '-420px'; }     
+        async function confirmCart(){
+          const cart = getCart();
+          if(!cart || cart.length === 0){ alert('Giỏ rỗng'); return; }
 
-          // panel open/close
-          const panel = document.getElementById('cartPanel');
-          function openPanel(){ panel.style.right = '0'; }
-          function closePanel(){ panel.style.right = '-420px'; }
+          // LẤY THÔNG TIN KHÁCH TỪ LOCALSTORAGE (home đã lưu)
+          const cust = getCustomer();
+          const token = (cust && cust.token) ? cust.token : ('C-' + Math.random().toString(36).slice(2,8).toUpperCase());
 
-          // confirm: send to server (includes customer)
-          async function confirmCart(){
-            const cart = getCart();
-            if(!cart || cart.length === 0){ alert('Giỏ rỗng'); return; }
+          // LẤY CỜ MANG VỀ
+          const isTakeaway = document.getElementById('takeawayChk').checked;
 
-            // lấy customer từ localStorage (được set trên Home)
-            const cust = getCustomer();
-            const token = (cust && cust.token) ? cust.token : ('C-' + Math.random().toString(36).slice(2,8).toUpperCase());
+          // TẠO PAYLOAD GỬI OrdersController.Create([FromBody] Order)
+          const payload = {
+            tableToken: token,
+            customerName: cust?.name ?? '',
+            customerPhone: cust?.phone ?? '',
+            customerAddress: cust?.address ?? '',
+            isTakeaway: isTakeaway,   // <-- THÊM DÒNG NÀY
+            items: cart.map(i => ({
+              menuItemId: i.menuItemId,            // đúng theo cart bạn đang lưu
+              qty: i.qty || 1,
+              note: ''                              // thêm note nếu bạn có
+            }))
+          };
 
-            const payload = {
-              tableToken: token,
-              customerName: cust?.name ?? '',
-              customerPhone: cust?.phone ?? '',
-              customerAddress: cust?.address ?? '',
-              items: cart.map(i => ({ menuItemId: i.menuItemId, qty: i.qty || 1, note: '' }))
-            };
+          try {
+            const btn = document.getElementById('confirmCartBtn');
+            btn.disabled = true; btn.innerText = 'Đang gửi...';
 
-            try {
-              const btn = document.getElementById('confirmCartBtn');
-              btn.disabled = true;
-              btn.innerText = 'Đang gửi...';
+            const resp = await fetch('/Orders/Create', {
+              method: 'POST',
+              headers: { 'Content-Type':'application/json' },
+              body: JSON.stringify(payload)
+            });
 
-              const resp = await fetch('/Orders/Create', {
-                method: 'POST',
-                headers: { 'Content-Type':'application/json' },
-                body: JSON.stringify(payload)
-              });
-
-              if(!resp.ok){
-                const text = await resp.text();
-                alert('Tạo order thất bại: ' + text);
-                btn.disabled = false;
-                btn.innerText = 'Xác nhận món';
-                return;
-              }
-
-              const data = await resp.json();
-              alert('Đã gửi bếp. Mã order: ' + (data.id || 'unknown'));
-              // clear cart and UI
-              localStorage.removeItem(CART_KEY);
-              refreshCartUI();
-              closePanel();
-              btn.disabled = false;
-              btn.innerText = 'Xác nhận món';
-            } catch(err){
-              console.error('Lỗi gửi order', err);
-              alert('Lỗi gửi order: ' + (err.message || err));
-              const btn = document.getElementById('confirmCartBtn');
-              btn.disabled = false;
-              btn.innerText = 'Xác nhận món';
+            if(!resp.ok){
+              const text = await resp.text();
+              alert('Tạo order thất bại: ' + text);
+              btn.disabled = false; btn.innerText = 'Xác nhận món';
+              return;
             }
+
+            const data = await resp.json();
+            alert('Đã gửi bếp. Mã order: ' + (data.id || 'unknown'));
+
+            localStorage.removeItem(CART_KEY);
+            refreshCartUI();
+            closePanel();
+            btn.disabled = false; btn.innerText = 'Xác nhận món';
+          } catch(err){
+            alert('Lỗi gửi order: ' + (err.message || err));
+            const btn = document.getElementById('confirmCartBtn');
+            btn.disabled = false; btn.innerText = 'Xác nhận món';
           }
+        }
 
           // event bindings on DOM ready
           document.addEventListener('DOMContentLoaded', () => {
@@ -240,6 +234,7 @@
           });
 
         })();
+
     </script>
 
     <style>
