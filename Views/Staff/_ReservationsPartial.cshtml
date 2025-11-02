@@ -67,16 +67,17 @@
                     @* NÚT CHỌN ĐỒ → /Menu *@
                     @if (!string.IsNullOrEmpty(r.AssignedTable) && string.IsNullOrEmpty(r.LinkOrderId))
                     {
-                        <button type="button"
-                                class="btn btn-sm btn-primary choose-food"
-                                data-id="@r.Id"
-                                data-name="@r.CustomerName"
-                                data-phone="@r.Phone"
-                                data-email="@r.Email"
-                                data-table="@r.AssignedTable">
-                          Chọn đồ
-                        </button>
+                        <a href="/Menu?res=@r.Id"
+                           class="btn btn-sm btn-primary choose-food"
+                           data-id="@r.Id"
+                           data-name="@r.CustomerName"
+                           data-phone="@r.Phone"
+                           data-email="@r.Email"
+                           data-table="@r.AssignedTable">
+                            Chọn đồ
+                        </a>
                     }
+
                     else if (!string.IsNullOrEmpty(r.LinkOrderId))
                     {
                         <span class="text-muted">Đã có order</span>

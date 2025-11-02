@@ -1,9 +1,9 @@
 [
   {
     "Id": "A1",
-    "IsOccuped": true,
-    "OccupiedById": "RES:85ee1846-a2e9-4d13-b6de-920d8ce2f772",
-    "Since": "2025-11-02T17:42:24.8927968Z"
+    "IsOccuped": false,
+    "OccupiedById": null,
+    "Since": null
   },
   {
     "Id": "A2",
