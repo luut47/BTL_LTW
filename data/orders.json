@@ -1,7 +1,75 @@
 [
   {
-    "Id": "8d44fa61-de6a-421e-8246-8bfd91bddc2c",
-    "TableToken": "C-DKKW9",
+    "Id": "06f5170e-3961-48e2-a375-b97dced2037e",
+    "TableToken": "C-NH6EK",
+    "OrderToken": null,
+    "AssignedTable": null,
+    "IsTakeAway": true,
+    "CustomerName": "Mai",
+    "CustomerPhone": "06",
+    "CustomerAddress": "",
+    "Items": [
+      {
+        "MenuItemId": 1,
+        "MenuItemName": "C\u00E0 ph\u00EA s\u1EEFa",
+        "Qty": 1,
+        "UnitPrice": 30000,
+        "Note": "",
+        "Status": "Pending"
+      },
+      {
+        "MenuItemId": 2,
+        "MenuItemName": "C\u00E0 ph\u00EA \u0111en",
+        "Qty": 1,
+        "UnitPrice": 25000,
+        "Note": "",
+        "Status": "Pending"
+      }
+    ],
+    "Total": 55000,
+    "Status": "Pending",
+    "IsCompleted": false,
+    "CreatedAt": "2025-11-03T09:13:33.3934739Z",
+    "PaymenMethod": null,
+    "ReservationId": null
+  },
+  {
+    "Id": "41b00619-7383-427a-ab38-7078535cf3fa",
+    "TableToken": "C-NH6EK",
+    "OrderToken": null,
+    "AssignedTable": "A2",
+    "IsTakeAway": false,
+    "CustomerName": "Mai",
+    "CustomerPhone": "06",
+    "CustomerAddress": "",
+    "Items": [
+      {
+        "MenuItemId": 1,
+        "MenuItemName": "C\u00E0 ph\u00EA s\u1EEFa",
+        "Qty": 1,
+        "UnitPrice": 30000,
+        "Note": "",
+        "Status": "Pending"
+      },
+      {
+        "MenuItemId": 2,
+        "MenuItemName": "C\u00E0 ph\u00EA \u0111en",
+        "Qty": 1,
+        "UnitPrice": 25000,
+        "Note": "",
+        "Status": "Pending"
+      }
+    ],
+    "Total": 55000,
+    "Status": "Completed",
+    "IsCompleted": true,
+    "CreatedAt": "2025-11-03T09:15:24.6618963Z",
+    "PaymenMethod": null,
+    "ReservationId": null
+  },
+  {
+    "Id": "7d1c1955-3f23-4e17-b214-49923ff99ce2",
+    "TableToken": "C-NH6EK",
     "OrderToken": null,
     "AssignedTable": null,
     "IsTakeAway": false,
@@ -15,81 +83,13 @@
         "Qty": 1,
         "UnitPrice": 30000,
         "Note": "",
-        "Status": "Served"
+        "Status": "Pending"
       }
     ],
     "Total": 30000,
     "Status": "Completed",
     "IsCompleted": true,
-    "CreatedAt": "2025-11-02T16:35:02.0311875Z",
-    "PaymenMethod": null,
-    "ReservationId": null
-  },
-  {
-    "Id": "e4dd11a2-a280-48d3-9160-6309fca0ba33",
-    "TableToken": "C-DKKW9",
-    "OrderToken": null,
-    "AssignedTable": null,
-    "IsTakeAway": false,
-    "CustomerName": "Mai",
-    "CustomerPhone": "06",
-    "CustomerAddress": "",
-    "Items": [
-      {
-        "MenuItemId": 2,
-        "MenuItemName": "C\u00E0 ph\u00EA \u0111en",
-        "Qty": 1,
-        "UnitPrice": 25000,
-        "Note": "",
-        "Status": "Served"
-      },
-      {
-        "MenuItemId": 3,
-        "MenuItemName": "Tr\u00E0 \u0111\u00E0o",
-        "Qty": 1,
-        "UnitPrice": 35000,
-        "Note": "",
-        "Status": "Served"
-      }
-    ],
-    "Total": 60000,
-    "Status": "Completed",
-    "IsCompleted": true,
-    "CreatedAt": "2025-11-02T18:02:01.8384789Z",
-    "PaymenMethod": null,
-    "ReservationId": null
-  },
-  {
-    "Id": "50fb2953-b517-48fe-a58f-a74c6952eb6b",
-    "TableToken": "C-DKKW9",
-    "OrderToken": null,
-    "AssignedTable": null,
-    "IsTakeAway": false,
-    "CustomerName": "Mai",
-    "CustomerPhone": "06",
-    "CustomerAddress": "",
-    "Items": [
-      {
-        "MenuItemId": 101,
-        "MenuItemName": "Khoai t\u00E2y chi\u00EAn",
-        "Qty": 1,
-        "UnitPrice": 45000,
-        "Note": "",
-        "Status": "Served"
-      },
-      {
-        "MenuItemId": 102,
-        "MenuItemName": "G\u1ECFi cu\u1ED1n",
-        "Qty": 1,
-        "UnitPrice": 40000,
-        "Note": "",
-        "Status": "Served"
-      }
-    ],
-    "Total": 85000,
-    "Status": "Completed",
-    "IsCompleted": true,
-    "CreatedAt": "2025-11-02T18:02:48.4954346Z",
+    "CreatedAt": "2025-11-03T09:17:02.555619Z",
     "PaymenMethod": null,
     "ReservationId": null
   }

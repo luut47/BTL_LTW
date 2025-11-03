@@ -13,6 +13,10 @@ else
                 <strong>Order:</strong> @o.Id
                 &nbsp; - &nbsp; <strong>Mã đơn:</strong> @o.TableToken
                 &nbsp; - &nbsp; <strong>@o.Status</strong>
+                @if ((bool)(o?.IsTakeAway ?? o?.IsTakeAway ?? false))
+                {
+                    <span class="badge bg-info text-dark" style="font-weight:600;">Mang về</span>
+                }
             </div>
             <div>Created: @o.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</div>
 
@@ -44,14 +48,7 @@ else
                 }
             </ul>
         </div>
-        <strong>Order:</strong>
  
-        @o.Id
-        @if (o.IsTakeAway)
-        {
-            <span class="badge bg-info ms-2">Mang về</span>
-        }
-
     }
 }
 

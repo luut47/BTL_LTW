@@ -8,8 +8,8 @@
     "People": 2,
     "Note": null,
     "CreatedAt": "2025-11-02T08:31:09.3346575Z",
-    "AssignedTable": null,
-    "Status": "Pending",
+    "AssignedTable": "A1",
+    "Status": "Confirmed",
     "LinkOrderId": null
   }
 ]
