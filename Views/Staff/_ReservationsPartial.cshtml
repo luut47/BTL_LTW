@@ -67,17 +67,16 @@
                     @* NÚT CHỌN ĐỒ → /Menu *@
                     @if (!string.IsNullOrEmpty(r.AssignedTable) && string.IsNullOrEmpty(r.LinkOrderId))
                     {
-                        <a href="/Menu?res=@r.Id"
-                           class="btn btn-sm btn-primary choose-food"
-                           data-id="@r.Id"
-                           data-name="@r.CustomerName"
-                           data-phone="@r.Phone"
-                           data-email="@r.Email"
-                           data-table="@r.AssignedTable">
+                        <button type="button"
+                                class="btn btn-sm btn-primary choose-food"
+                                data-id="@r.Id"
+                                data-name="@r.CustomerName"
+                                data-phone="@r.Phone"
+                                data-email="@r.Email"
+                                data-table="@r.AssignedTable">
                             Chọn đồ
-                        </a>
+                        </button>
                     }
-
                     else if (!string.IsNullOrEmpty(r.LinkOrderId))
                     {
                         <span class="text-muted">Đã có order</span>
@@ -86,6 +85,7 @@
                     {
                         <span class="text-muted">Gán bàn trước</span>
                     }
+
                 </td>
                 <td>
                     @if (!string.IsNullOrEmpty(r.LinkOrderId))
@@ -105,7 +105,7 @@
         }
     </tbody>
 </table>
-@section Scripts {
+@* @section Scripts {
     <script>
         // Nút CHỌN ĐỒ → chuyển sang /Menu và nạp sẵn localStorage
         document.addEventListener('click', function(e){
@@ -127,4 +127,4 @@
           window.location.href = '/Menu?res=' + encodeURIComponent(resid);
         });
     </script>
-}
+} *@

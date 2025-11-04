@@ -123,3 +123,35 @@
         </ul>
     </div>
 </div>
+<script>
+    document.addEventListener('click', function(e){
+        const btn = e.target.closest('.choose-food');
+        if (!btn) return;
+
+        e.preventDefault();
+
+        const resid = btn.dataset.id;
+        const name  = btn.dataset.name || '';
+        const phone = btn.dataset.phone || '';
+        const email = btn.dataset.email || '';
+        const table = btn.dataset.table || '';
+
+        const customer = {
+            name: name,
+            phone: phone,
+            address: email,
+            token: table        // BẮT BUỘC: token = mã bàn A1, A2,...
+        };
+
+        try {
+            localStorage.setItem('customer', JSON.stringify(customer));
+            localStorage.setItem('currentReservationId', resid);
+            // nếu muốn sạch giỏ cũ:
+            localStorage.removeItem('cart');
+        } catch {}
+
+        // chuyển sang Menu để chọn đồ
+        window.location.href = '/Menu';
+    });
+</script>
+

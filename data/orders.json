@@ -1,46 +1,12 @@
 [
   {
-    "Id": "06f5170e-3961-48e2-a375-b97dced2037e",
-    "TableToken": "C-NH6EK",
+    "Id": "18a846ef-3191-4c1c-bee1-543941e9908d",
+    "TableToken": "C-622E9",
     "OrderToken": null,
     "AssignedTable": null,
-    "IsTakeAway": true,
-    "CustomerName": "Mai",
-    "CustomerPhone": "06",
-    "CustomerAddress": "",
-    "Items": [
-      {
-        "MenuItemId": 1,
-        "MenuItemName": "C\u00E0 ph\u00EA s\u1EEFa",
-        "Qty": 1,
-        "UnitPrice": 30000,
-        "Note": "",
-        "Status": "Pending"
-      },
-      {
-        "MenuItemId": 2,
-        "MenuItemName": "C\u00E0 ph\u00EA \u0111en",
-        "Qty": 1,
-        "UnitPrice": 25000,
-        "Note": "",
-        "Status": "Pending"
-      }
-    ],
-    "Total": 55000,
-    "Status": "Pending",
-    "IsCompleted": false,
-    "CreatedAt": "2025-11-03T09:13:33.3934739Z",
-    "PaymenMethod": null,
-    "ReservationId": null
-  },
-  {
-    "Id": "41b00619-7383-427a-ab38-7078535cf3fa",
-    "TableToken": "C-NH6EK",
-    "OrderToken": null,
-    "AssignedTable": "A2",
     "IsTakeAway": false,
     "CustomerName": "Mai",
-    "CustomerPhone": "06",
+    "CustomerPhone": "12",
     "CustomerAddress": "",
     "Items": [
       {
@@ -63,33 +29,7 @@
     "Total": 55000,
     "Status": "Completed",
     "IsCompleted": true,
-    "CreatedAt": "2025-11-03T09:15:24.6618963Z",
-    "PaymenMethod": null,
-    "ReservationId": null
-  },
-  {
-    "Id": "7d1c1955-3f23-4e17-b214-49923ff99ce2",
-    "TableToken": "C-NH6EK",
-    "OrderToken": null,
-    "AssignedTable": null,
-    "IsTakeAway": false,
-    "CustomerName": "Mai",
-    "CustomerPhone": "06",
-    "CustomerAddress": "",
-    "Items": [
-      {
-        "MenuItemId": 1,
-        "MenuItemName": "C\u00E0 ph\u00EA s\u1EEFa",
-        "Qty": 1,
-        "UnitPrice": 30000,
-        "Note": "",
-        "Status": "Pending"
-      }
-    ],
-    "Total": 30000,
-    "Status": "Completed",
-    "IsCompleted": true,
-    "CreatedAt": "2025-11-03T09:17:02.555619Z",
+    "CreatedAt": "2025-11-04T09:12:07.1282445Z",
     "PaymenMethod": null,
     "ReservationId": null
   }

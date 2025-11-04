@@ -1,13 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BTL_LTW.Models;
 using BTL_LTW.Services;
+using System.Text.Json;
 
 namespace BTL_LTW.Controllers
 {
     public class OrdersController : Controller
     {
         private readonly IStorage _storage;
-        public OrdersController(IStorage sto) => _storage = sto;
+        private readonly IWebHostEnvironment _env;
+        private readonly JsonSerializerOptions _opt = new() { WriteIndented = true, PropertyNameCaseInsensitive = true };
+
+        public OrdersController(IStorage sto, IWebHostEnvironment env)
+        {
+            _storage = sto;
+            _env = env;
+        } 
 
         [HttpGet]
         public IActionResult Get(string id)
@@ -33,23 +41,34 @@ namespace BTL_LTW.Controllers
 
             try
             {
-                // nếu Order model của bạn có thêm thuộc tính ReservationId thì ưu tiên lấy từ body
+                // ưu tiên lấy ReservationId từ body nếu bạn đã thêm vào model
                 if (!string.IsNullOrWhiteSpace(dto?.ReservationId))
                     reservationId = dto.ReservationId;
 
                 var saved = _storage.CreateOrder(dto);
 
-                // Nếu đơn này xuất phát từ 1 reservation -> link lại để Staff/Reservations hiện "In bill/Hoàn tất"
+                // nếu có reservationId -> cập nhật lại file reservations.json
                 if (!string.IsNullOrWhiteSpace(reservationId))
                 {
-                    var reservations = _storage.ReadReservations();     // expose trong IStorage
-                    var r = reservations.FirstOrDefault(x => x.Id == reservationId);
+                    var dataDir = Path.Combine(_env.ContentRootPath, "data");
+                    var file = Path.Combine(dataDir, "reservations.json");
+                    var list = new List<Reservation>();
+
+                    if (System.IO.File.Exists(file))
+                    {
+                        var txt = System.IO.File.ReadAllText(file);
+                        list = System.Text.Json.JsonSerializer.Deserialize<List<Reservation>>(txt, _opt) ?? new();
+                    }
+
+                    var r = list.FirstOrDefault(x => x.Id == reservationId);
                     if (r != null)
                     {
-                        r.LinkOrderId = saved.Id;
-                        r.Status = "Seated"; // hoặc "Ordered" tùy bạn
-                        _storage.SaveReservations(reservations);         // expose trong IStorage
+                        r.LinkOrderId = saved.Id;      // thuộc tính bạn dùng để hiển thị cột Hóa đơn
+                                                         // nếu Reservation có AssignedTable thì có thể set luôn saved.AssignedTable = r.AssignedTable;
                     }
+
+                    System.IO.File.WriteAllText(file,
+                        System.Text.Json.JsonSerializer.Serialize(list, _opt));
                 }
 
                 return CreatedAtAction(nameof(Get), new { id = saved.Id }, saved);
@@ -59,6 +78,7 @@ namespace BTL_LTW.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
 
         [HttpPatch]
         public IActionResult UpdateItemStatus(string orderId, int menuItemId, [FromQuery] string status)

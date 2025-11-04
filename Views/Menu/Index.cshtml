@@ -165,71 +165,69 @@
         function closePanel(){ panel.style.right = '-420px'; }     
 
 
-                async function confirmCart(){
-          const cart = getCart();
-          if (!cart || cart.length === 0) { alert('Giỏ rỗng'); return; }
+        async function confirmCart(){
+            const cart = getCart();
+            if (!cart || cart.length === 0) { alert('Giỏ rỗng'); return; }
 
-          const cust = getCustomer();
-          if (!cust || !cust.name || !cust.phone) {
-            alert('Thiếu thông tin khách (tên/số điện thoại). Vui lòng nhập ở trang Home hoặc bấm “Chọn đồ” từ trang Staff/Reservations.');
-            return;
-          }
-
-          const token = cust.token ? cust.token : ('C-' + Math.random().toString(36).slice(2,8).toUpperCase());
-          const isTakeaway = !!document.getElementById('takeawayChk')?.checked;
-          const reservationId = localStorage.getItem('currentReservationId') || '';
-
-          const payload = {
-            tableToken: token,
-            customerName: cust.name || '',
-            customerPhone: cust.phone || '',
-            customerAddress: cust.address || '',
-            isTakeaway: isTakeaway,
-            // Nếu backend đã thêm Order.ReservationId thì giữ dòng dưới;
-            // nếu backend đọc qua query, dòng này có cũng không sao.
-            reservationId: reservationId || null,
-            items: cart.map(i => ({
-              menuItemId: i.menuItemId,
-              qty: i.qty || 1,
-              note: i.note || ''
-            }))
-          };
-
-          const btn = document.getElementById('confirmCartBtn');
-          try {
-            if (btn) { btn.disabled = true; btn.innerText = 'Đang gửi...'; }
-
-            // Nếu backend chỉ đọc query: thêm ?reservationId=...
-            const url = reservationId
-              ? `/Orders/Create?reservationId=${encodeURIComponent(reservationId)}`
-              : `/Orders/Create`;
-
-            const resp = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type':'application/json' },
-              body: JSON.stringify(payload)
-            });
-
-            if (!resp.ok) {
-              const text = await resp.text();
-              alert('Tạo order thất bại: ' + text);
-              return;
+            const cust = getCustomer();
+            if (!cust || !cust.name || !cust.phone) {
+                alert('Thiếu thông tin khách, hãy quay lại màn hình trước hoặc bấm Chọn đồ lại.');
+                return;
             }
 
-            const data = await resp.json();
-            alert('Đã gửi bếp. Mã order: ' + (data.id || 'unknown'));
+            const token = cust.token ? cust.token : ('C-' + Math.random().toString(36).slice(2,8).toUpperCase());
+            const isTakeaway    = document.getElementById('takeawayChk')?.checked || false;
+            const reservationId = localStorage.getItem('currentReservationId') || '';
 
-            // Dọn context
-            localStorage.removeItem('currentReservationId');
-            localStorage.removeItem(CART_KEY);
-            refreshCartUI();
-            if (typeof closePanel === 'function') closePanel();
-          } catch (err) {
-            alert('Lỗi gửi order: ' + (err.message || err));
-          } finally {
-            if (btn) { btn.disabled = false; btn.innerText = 'Xác nhận món'; }
-          }
+            const payload = {
+                tableToken: token,
+                customerName: cust.name || '',
+                customerPhone: cust.phone || '',
+                customerAddress: cust.address || '',
+                isTakeaway: isTakeaway,
+                reservationId: reservationId || null,
+                items: cart.map(i => ({
+                    menuItemId: i.menuItemId,
+                    qty: i.qty || 1,
+                    note: i.note || ''
+                }))
+            };
+
+            const btn = document.getElementById('confirmCartBtn');
+            try {
+                if (btn) { btn.disabled = true; btn.innerText = 'Đang gửi...'; }
+
+                // nếu OrdersController.Create nhận reservationId qua query:
+                const url = reservationId
+                    ? `/Orders/Create?reservationId=${encodeURIComponent(reservationId)}`
+                    : `/Orders/Create`;
+
+                const resp = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type':'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!resp.ok) {
+                    const text = await resp.text();
+                    alert('Tạo order thất bại: ' + text);
+                    return;
+                }
+
+                const data = await resp.json();
+                alert('Đã gửi bếp. Mã order: ' + (data.id || 'unknown'));
+
+                localStorage.removeItem('currentReservationId');
+                localStorage.removeItem(CART_KEY);
+                refreshCartUI();
+                if (typeof closePanel === 'function') closePanel();
+            } catch (err) {
+                alert('Lỗi gửi order: ' + (err.message || err));
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = 'Xác nhận món'; }
+            }
         }
+
 
           // event bindings on DOM ready
           document.addEventListener('DOMContentLoaded', () => {
