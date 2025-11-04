@@ -1,15 +1,15 @@
 [
   {
-    "Id": "94ccad7f-a353-4e60-8a87-1f247cda1bcd",
-    "CustomerName": "Abc",
-    "Phone": "123",
+    "Id": "1222251b-da11-4fb7-87f4-60501ab776aa",
+    "CustomerName": "L\u01B0u Minh Th\u1EAFng",
+    "Phone": "0969312975",
     "Email": null,
-    "DateTime": "2025-11-04T16:11:00",
+    "DateTime": "2025-11-04T23:34:00",
     "People": 2,
-    "Note": "G\u1ECDi \u0111\u1ED3 t\u1EA1i qu\u00E1n",
-    "CreatedAt": "2025-11-04T09:11:57.2237952Z",
-    "AssignedTable": "A7",
+    "Note": null,
+    "CreatedAt": "2025-11-04T16:34:48.3619628Z",
+    "AssignedTable": "A2",
     "Status": "Confirmed",
-    "LinkOrderId": null
+    "LinkOrderId": "cc9f7eb4-8a81-42cd-b00e-30a69a8112fa"
   }
 ]

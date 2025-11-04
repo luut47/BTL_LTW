@@ -1,12 +1,12 @@
 [
   {
-    "Id": "18a846ef-3191-4c1c-bee1-543941e9908d",
-    "TableToken": "C-622E9",
+    "Id": "cc9f7eb4-8a81-42cd-b00e-30a69a8112fa",
+    "TableToken": "A2",
     "OrderToken": null,
     "AssignedTable": null,
     "IsTakeAway": false,
-    "CustomerName": "Mai",
-    "CustomerPhone": "12",
+    "CustomerName": "L\u01B0u Minh Th\u1EAFng",
+    "CustomerPhone": "0969312975",
     "CustomerAddress": "",
     "Items": [
       {
@@ -16,20 +16,38 @@
         "UnitPrice": 30000,
         "Note": "",
         "Status": "Pending"
-      },
+      }
+    ],
+    "Total": 30000,
+    "Status": "Pending",
+    "IsCompleted": false,
+    "CreatedAt": "2025-11-04T16:35:50.2421164Z",
+    "PaymenMethod": null,
+    "ReservationId": "1222251b-da11-4fb7-87f4-60501ab776aa"
+  },
+  {
+    "Id": "f2f494d5-6ffc-4d80-85b6-330924a5b299",
+    "TableToken": "C-7Z2UX",
+    "OrderToken": null,
+    "AssignedTable": null,
+    "IsTakeAway": false,
+    "CustomerName": "Mai",
+    "CustomerPhone": "150506",
+    "CustomerAddress": "",
+    "Items": [
       {
-        "MenuItemId": 2,
-        "MenuItemName": "C\u00E0 ph\u00EA \u0111en",
+        "MenuItemId": 101,
+        "MenuItemName": "Khoai t\u00E2y chi\u00EAn",
         "Qty": 1,
-        "UnitPrice": 25000,
+        "UnitPrice": 45000,
         "Note": "",
         "Status": "Pending"
       }
     ],
-    "Total": 55000,
-    "Status": "Completed",
-    "IsCompleted": true,
-    "CreatedAt": "2025-11-04T09:12:07.1282445Z",
+    "Total": 45000,
+    "Status": "Pending",
+    "IsCompleted": false,
+    "CreatedAt": "2025-11-04T16:36:15.379749Z",
     "PaymenMethod": null,
     "ReservationId": null
   }

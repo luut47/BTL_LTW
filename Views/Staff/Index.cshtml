@@ -123,35 +123,50 @@
         </ul>
     </div>
 </div>
-<script>
-    document.addEventListener('click', function(e){
-        const btn = e.target.closest('.choose-food');
-        if (!btn) return;
+@section Scripts {
+    <script>
+        function reloadResv(){
+          fetch('/Staff/ReservationsPartial', { headers: { 'X-Requested-With':'XMLHttpRequest' }})
+            .then(r => r.text())
+            .then(html => {
+              const el = document.getElementById('resv-root');
+              if (el) el.innerHTML = html;
+            })
+            .catch(err => console.error('reloadResv error', err));
+        }
 
-        e.preventDefault();
+        // tải lần đầu và sau đó 8s/lần
+        reloadResv();
+        setInterval(reloadResv, 8000);
 
-        const resid = btn.dataset.id;
-        const name  = btn.dataset.name || '';
-        const phone = btn.dataset.phone || '';
-        const email = btn.dataset.email || '';
-        const table = btn.dataset.table || '';
+        // ====== BẮT CLICK NÚT "CHỌN ĐỒ" ======
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-choose-food');
+            if (!btn) return;            // không phải nút chọn đồ thì bỏ qua
 
-        const customer = {
-            name: name,
-            phone: phone,
-            address: email,
-            token: table        // BẮT BUỘC: token = mã bàn A1, A2,...
-        };
+            e.preventDefault();
 
-        try {
-            localStorage.setItem('customer', JSON.stringify(customer));
-            localStorage.setItem('currentReservationId', resid);
-            // nếu muốn sạch giỏ cũ:
-            localStorage.removeItem('cart');
-        } catch {}
+            const resid = btn.dataset.id;
+            const name  = btn.dataset.name || '';
+            const phone = btn.dataset.phone || '';
+            const email = btn.dataset.email || '';
+            const table = btn.dataset.table || '';
 
-        // chuyển sang Menu để chọn đồ
-        window.location.href = '/Menu';
-    });
-</script>
+            // ghi thông tin khách + bàn vào localStorage cho trang Menu
+            const customer = { name: name, phone: phone, address: email, token: table };
+            try {
+                localStorage.setItem('customer', JSON.stringify(customer));
+                localStorage.setItem('currentReservationId', resid);
+                // nếu muốn, xóa giỏ cũ:
+                // localStorage.removeItem('cart');
+            } catch (err) {
+                console.error('localStorage error', err);
+            }
+
+            // điều hướng sang Menu
+            window.location.href = '/Menu';
+        });
+    </script>
+}
+
 

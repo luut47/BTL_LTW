@@ -1,15 +1,15 @@
 [
   {
     "Id": "A1",
-    "IsOccuped": false,
+    "IsOccuped": true,
     "OccupiedById": null,
     "Since": null
   },
   {
     "Id": "A2",
-    "IsOccuped": false,
-    "OccupiedById": null,
-    "Since": null
+    "IsOccuped": true,
+    "OccupiedById": "RES:1222251b-da11-4fb7-87f4-60501ab776aa",
+    "Since": "2025-11-04T16:35:46.7782782Z"
   },
   {
     "Id": "A3",
@@ -37,9 +37,9 @@
   },
   {
     "Id": "A7",
-    "IsOccuped": true,
-    "OccupiedById": "RES:94ccad7f-a353-4e60-8a87-1f247cda1bcd",
-    "Since": "2025-11-04T09:40:42.5114762Z"
+    "IsOccuped": false,
+    "OccupiedById": null,
+    "Since": null
   },
   {
     "Id": "A8",
