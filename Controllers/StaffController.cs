@@ -36,12 +36,21 @@ namespace BTL_LTW.Controllers
             if (HttpContext.Session.GetString("isStaff") != "1")
                 return RedirectToAction(nameof(Login));
 
-            var orders = _storage.GetOrders().OrderByDescending(o => o.CreatedAt).ToList();
-            var tables = _storage.GetTables();                   
-            ViewBag.Tables = tables;                              
-            ViewBag.OccupiedCount = tables.Count(t => t.IsOccuped);
+            var allOrders = _storage.GetOrders();
+
+            // CHỈ hiển thị đơn tại quán + đơn mang về
+            // => các order không gắn với Reservation
+            var orders = allOrders
+                .Where(o => string.IsNullOrEmpty(o.ReservationId))
+                .OrderByDescending(o => o.CreatedAt)
+                .ToList();
+
+            var tables = _storage.GetTables();
+            ViewBag.Tables = tables;
+
             return View(orders);
         }
+
         [HttpPost]
         public IActionResult AssignTable(string orderId, string tableId)
         {
@@ -58,29 +67,59 @@ namespace BTL_LTW.Controllers
             return View(o);
         }
         [HttpPost]
-        public IActionResult CompletedOrder(string id)
+        public IActionResult CompletedOrder(string id, string? returnTo)
         {
-            if (!IsAuthenticated()) return Unauthorized();
-            _storage.MarkOrder(id);
-            return RedirectToAction(nameof(Index));
+            var orders = _storage.GetOrders();
+            var o = orders.FirstOrDefault(x => x.Id == id);
+            if (o == null) return NotFound();
+
+            o.IsCompleted = true;
+            o.Status = "Completed";
+
+            _storage.SaveOrders(orders);
+
+            if (!string.IsNullOrEmpty(returnTo) && returnTo == "reservations")
+                return RedirectToAction("Reservations");
+
+            return RedirectToAction("Index");
         }
+
         public IActionResult Logout()
         {
             HttpContext.Session.Remove("isStaff");
             return RedirectToAction(nameof(Login));
         }
         [HttpGet]
-        [HttpGet]
         public IActionResult Reservations()
         {
             if (HttpContext.Session.GetString("isStaff") != "1")
                 return RedirectToAction(nameof(Login));
 
-            ViewBag.Tables = _storage.GetTables();        // để dropdown có dữ liệu
-            var list = _storage.ReadReservations()
-                               .OrderByDescending(x => x.CreatedAt)
-                               .ToList();
-            return View(list); // dùng view mạnh kiểu: Views/Staff/Reservations.cshtml (model: List<Reservation>)
+            // đọc reservation như hiện tại của bạn:
+            var reservations = _storage.ReadReservations()  // hoặc _storage.ReadReservations()
+                .OrderByDescending(r => r.CreatedAt)
+                .ToList();
+
+            var tables = _storage.GetTables();      // hoặc _storage.GetTables() tuỳ interface bạn
+            ViewBag.Tables = tables;
+
+            var allOrders = _storage.GetOrders();
+            // map: reservationId -> order từ LinkOrderId
+            var ordersByReservation = new Dictionary<string, Order>();
+
+            foreach (var r in reservations)
+            {
+                if (!string.IsNullOrEmpty(r.LinkOrderId))
+                {
+                    var o = allOrders.FirstOrDefault(x => x.Id == r.LinkOrderId);
+                    if (o != null)
+                        ordersByReservation[r.Id] = o;
+                }
+            }
+
+            ViewBag.OrdersByReservation = ordersByReservation;
+
+            return View(reservations);
         }
 
         [HttpGet]
@@ -89,11 +128,28 @@ namespace BTL_LTW.Controllers
             if (HttpContext.Session.GetString("isStaff") != "1")
                 return Unauthorized();
 
-            ViewBag.Tables = _storage.GetTables();        // partial cũng cần
-            var list = _storage.ReadReservations()
-                               .OrderByDescending(x => x.CreatedAt)
-                               .ToList();
-            return PartialView("_ReservationsPartial", list);
+            var reservations = _storage.ReadReservations()
+                .OrderByDescending(r => r.CreatedAt)
+                .ToList();
+
+            var tables = _storage.GetTables();      // hoặc GetTables()
+            ViewBag.Tables = tables;
+
+            var allOrders = _storage.GetOrders();
+            var ordersByReservation = new Dictionary<string, Order>();
+            foreach (var r in reservations)
+            {
+                if (!string.IsNullOrEmpty(r.LinkOrderId))
+                {
+                    var o = allOrders.FirstOrDefault(x => x.Id == r.LinkOrderId);
+                    if (o != null)
+                        ordersByReservation[r.Id] = o;
+                }
+            }
+
+            ViewBag.OrdersByReservation = ordersByReservation;
+
+            return PartialView("_ReservationsPartial", reservations);
         }
 
         [HttpPost]

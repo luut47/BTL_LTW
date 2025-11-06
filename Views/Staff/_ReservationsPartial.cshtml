@@ -1,7 +1,9 @@
 ﻿@model List<BTL_LTW.Models.Reservation>
+@using BTL_LTW.Models
 @{
     var tables = ViewBag.Tables as List<BTL_LTW.Models.TableInfo>;
     var freeTables = tables?.Where(t => !t.IsOccuped).ToList() ?? new List<BTL_LTW.Models.TableInfo>();
+    var map = ViewBag.OrdersByReservation as Dictionary<string, Order>;
 }
 <table class="table table-sm">
     <thead>
@@ -15,7 +17,7 @@
             <th>Ghi chú</th>
             <th>Bàn</th>
             <th>Chọn đồ</th>
-            <th>Hóa đơn</th>
+            @* <th>Hóa đơn</th> *@
         </tr>
     </thead>
     <tbody>
@@ -88,43 +90,48 @@
 
                 </td>
                 <td>
-                    @if (!string.IsNullOrEmpty(r.LinkOrderId))
-                    {
-                        <a class="btn btn-sm btn-outline-secondary" target="_blank" href="/Staff/PrintBill?id=@r.LinkOrderId">In bill</a>
-                        <form method="post" action="/Staff/CompletedOrder" class="d-inline">
-                            <input type="hidden" name="id" value="@r.LinkOrderId" />
-                            <button type="submit" class="btn btn-sm btn-success">Hoàn tất</button>
-                        </form>
-                    }
-                    else
+                    @if (string.IsNullOrEmpty(r.LinkOrderId))
                     {
                         <span class="text-muted">Chưa có order</span>
                     }
                 </td>
+
+                @{
+                    Order order = null;
+                    if (map != null && map.TryGetValue(r.Id, out var od))
+                    {
+                        order = od;
+                    }
+                }
+                @if (order != null)
+                {
+                <tr>
+                    <td colspan="7" style="background:#fafafa;">
+                        <div style="font-weight:600;">Order của bàn đặt này:</div>
+                        <div><strong>Order:</strong> @order.Id - <strong>Trạng thái:</strong> @order.Status</div>
+                        <div>Khách: @order.CustomerName - @order.CustomerPhone</div>
+                        <div>Thời gian: @order.CreatedAt.ToLocalTime():g</div>
+                        <ul>
+                            @foreach (var it in order.Items)
+                            {
+                                <li>@it.MenuItemName - x@it.Qty - @it.UnitPrice.ToString("N0")</li>
+                            }
+                        </ul>
+                        <div><strong>Tổng:</strong> @order.Total.ToString("N0") VND</div>
+                        <a class="btn btn-sm btn-outline-secondary" target="_blank" href="/Staff/PrintBill?id=@order.Id">In bill</a>
+                        @if (!order.IsCompleted)
+                        {
+                            <form method="post" action="/Staff/CompletedOrder" class="d-inline ms-2">
+                                <input type="hidden" name="id" value="@order.Id" />
+                                <input type="hidden" name="returnTo" value="reservations" />
+                                <button type="submit" class="btn btn-sm btn-success">Hoàn tất</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+
             </tr>
         }
     </tbody>
 </table>
-@* @section Scripts {
-    <script>
-        // Nút CHỌN ĐỒ → chuyển sang /Menu và nạp sẵn localStorage
-        document.addEventListener('click', function(e){
-          if (!e.target.classList.contains('choose-food')) return;
-          const btn = e.target;
-          const resid = btn.dataset.id;
-          const name  = btn.dataset.name || '';
-          const phone = btn.dataset.phone || '';
-          const email = btn.dataset.email || '';
-          const table = btn.dataset.table || '';
-
-          // Lưu thông tin khách vào localStorage như luồng Home
-          const customer = { name, phone, address: email, token: table };
-          localStorage.setItem('customer', JSON.stringify(customer));
-          localStorage.setItem('currentReservationId', resid);  // để Menu gửi kèm
-          localStorage.removeItem('cart');                      // tuỳ bạn có muốn xoá giỏ cũ
-
-          // Điều hướng tới Menu (khách tự xem & thêm món)
-          window.location.href = '/Menu?res=' + encodeURIComponent(resid);
-        });
-    </script>
-} *@

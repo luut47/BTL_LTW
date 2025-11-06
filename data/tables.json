@@ -2,56 +2,56 @@
   {
     "Id": "A1",
     "IsOccuped": true,
-    "OccupiedById": null,
-    "Since": null
+    "OccupiedById": "RES:d3f725b5-b48a-4a06-9f49-2185ae540b34",
+    "Since": "2025-11-06T02:57:05.6250455Z"
   },
   {
     "Id": "A2",
     "IsOccuped": true,
-    "OccupiedById": "RES:1222251b-da11-4fb7-87f4-60501ab776aa",
-    "Since": "2025-11-04T16:35:46.7782782Z"
+    "OccupiedById": "RES:1d5e9cc3-2d0f-4912-8a67-f6f2cbb56118",
+    "Since": "2025-11-06T02:57:06.3091926Z"
   },
   {
     "Id": "A3",
-    "IsOccuped": false,
-    "OccupiedById": null,
-    "Since": null
+    "IsOccuped": true,
+    "OccupiedById": "RES:7474d7b2-f278-466b-86c2-556630ad27b3",
+    "Since": "2025-11-06T02:58:46.1051144Z"
   },
   {
     "Id": "A4",
-    "IsOccuped": false,
-    "OccupiedById": null,
-    "Since": null
+    "IsOccuped": true,
+    "OccupiedById": "RES:4f4ad43a-ea58-4f86-b0fc-fdee6237d3c8",
+    "Since": "2025-11-06T02:59:38.139253Z"
   },
   {
     "Id": "A5",
-    "IsOccuped": false,
-    "OccupiedById": null,
-    "Since": null
+    "IsOccuped": true,
+    "OccupiedById": "RES:0d4191f0-2330-42db-b45a-b445475d4a4d",
+    "Since": "2025-11-06T03:14:36.2863382Z"
   },
   {
     "Id": "A6",
-    "IsOccuped": false,
-    "OccupiedById": null,
-    "Since": null
+    "IsOccuped": true,
+    "OccupiedById": "RES:9883cd39-edca-413a-bad3-b1ff8adb24ca",
+    "Since": "2025-11-06T03:15:16.14782Z"
   },
   {
     "Id": "A7",
-    "IsOccuped": false,
-    "OccupiedById": null,
-    "Since": null
+    "IsOccuped": true,
+    "OccupiedById": "RES:e1ba5224-a654-43f2-9c27-572bade8de4b",
+    "Since": "2025-11-06T03:18:13.2426092Z"
   },
   {
     "Id": "A8",
-    "IsOccuped": false,
-    "OccupiedById": null,
-    "Since": null
+    "IsOccuped": true,
+    "OccupiedById": "RES:dc2ca15a-2489-44fe-aae0-3469e7e4d835",
+    "Since": "2025-11-06T03:18:37.9454578Z"
   },
   {
     "Id": "A9",
-    "IsOccuped": false,
-    "OccupiedById": null,
-    "Since": null
+    "IsOccuped": true,
+    "OccupiedById": "RES:82df86f5-396c-425f-af2e-e27186b10a08",
+    "Since": "2025-11-06T03:21:48.6584187Z"
   },
   {
     "Id": "A10",

@@ -12,6 +12,7 @@
                 <button id="btnReserve" type="button" class="btn btn-outline-primary">Đặt bàn trước</button>
                 <a class="btn btn-outline-secondary" href="tel:+84900000000">Gọi phục vụ</a>
                 <a class="btn btn-outline-secondary" href="mailto:contact@restaurant.example">Email</a>
+                <button id="btnWaiter" type="button" class="btn btn-outline-primary">Waiter</button>
             </div>
         </div>
     </header>
@@ -108,9 +109,14 @@
           const modal = document.getElementById('reserveModal');
           const btnOpen = document.getElementById('btnReserve');
           const btnClose = document.getElementById('btnReserveCancel');
+          const btnWaiter = document.getElementById('btnWaiter');
           if (btnOpen) btnOpen.addEventListener('click', () => modal.style.display = 'flex');
           if (btnClose) btnClose.addEventListener('click', () => modal.style.display = 'none');
-
+          if(btnWaiter){
+              btnWaiter.addEventListener('click', ()=>{
+                  window.location.href ='/Staff';
+              });
+          }
           // ==== xử lý form đặt bàn qua fetch (đúng URL /Reservation/Create) ====
           const form = document.getElementById('reserveForm');
           if (form) {

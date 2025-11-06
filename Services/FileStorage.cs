@@ -342,7 +342,13 @@ namespace BTL_LTW.Services
             System.IO.File.WriteAllText(ReservationsFile,
                 JsonSerializer.Serialize(list, _opt));
         }
-
+        public void SaveOrders(List<Order> orders)
+        {
+            Directory.CreateDirectory(_dataDir);
+            var json = JsonSerializer.Serialize(orders, _opt);
+            var OrdersFile = Path.Combine(_dataDir, "orders.json");
+            File.WriteAllText(OrdersFile, json);
+        }
         public bool AssignTableReservation(string reservationId, string tableId)
         {
             var resv = ReadReservations();                        // bạn đã có ReadReservations()
@@ -430,6 +436,7 @@ namespace BTL_LTW.Services
 
             return created;
         }
+        
 
     }
 }

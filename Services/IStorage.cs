@@ -28,5 +28,7 @@ namespace BTL_LTW.Services
         bool ReleaseTableByReservation(string reservationId);
         public void SaveReservations(List<Reservation> list);
         Order CreateOrderFromReservation(string reservationId, List<(int menuItemId, int qty, string? note)> items);
+        void SaveOrders(List<Order> orders);
+
     }
 }
