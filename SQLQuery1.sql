@@ -102,3 +102,6 @@ DELETE FROM Reservations;
 
 ALTER TABLE Reservations 
 ALTER COLUMN Note nvarchar(max) null;
+
+ALTER TABLE Reservations 
+ALTER COLUMN Email nvarchar(max) null;
