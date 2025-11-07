@@ -13,6 +13,7 @@
                 <a class="btn btn-outline-secondary" href="tel:+84900000000">Gọi phục vụ</a>
                 <a class="btn btn-outline-secondary" href="mailto:contact@restaurant.example">Email</a>
                 <button id="btnWaiter" type="button" class="btn btn-outline-primary">Waiter</button>
+                @* <button id="btnKitchen" type="button" class="btn btn-outline-primary">Kitchen</button> *@
             </div>
         </div>
     </header>
@@ -117,6 +118,7 @@
                   window.location.href ='/Staff';
               });
           }
+          
           // ==== xử lý form đặt bàn qua fetch (đúng URL /Reservation/Create) ====
           const form = document.getElementById('reserveForm');
           if (form) {

@@ -1,9 +1,17 @@
-﻿<h2 class="mb-3">Danh sách đặt bàn</h2>
+﻿<button id="btnKitchen" type="button" class="btn btn-outline-primary">Kitchen</button>
+
+<h2 class="mb-3">Danh sách đặt bàn</h2>
 
 <div id="resv-root">Đang tải...</div>
 
+
 @section Scripts {
     <script>
+        if(btnKitchen){
+              btnKitchen.addEventListener('click', ()=>{
+                  window.location.href ='/Kitchen';
+              });
+          }
         function reloadResv(){
           fetch('/Staff/ReservationsPartial', { headers: { 'X-Requested-With':'XMLHttpRequest' }})
             .then(r => r.text())

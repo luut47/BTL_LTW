@@ -23,6 +23,15 @@
     <tbody>
         @foreach (var r in Model)
         {
+            // Lấy order (nếu có) cho reservation này
+            Order order = null;
+            if (map != null && map.TryGetValue(r.Id, out var od))
+            {
+                order = od;
+            }
+            var statusLower = (order?.Status ?? "").ToLowerInvariant();
+            var isClosed = statusLower == "closed";
+
             <tr>
                 <td>@r.CreatedAt.ToLocalTime():g</td>
                 <td>@r.CustomerName</td>
@@ -33,9 +42,10 @@
                 <td>@r.Note</td>
 
                 <td>
+                    @* ==== CỘT BÀN ==== *@
                     @if (string.IsNullOrEmpty(r.AssignedTable))
                     {
-                        // GÁN BÀN
+                        // Chưa gán bàn
                         if (freeTables.Any())
                         {
                             <form method="post" action="/Staff/AssignTableReservation" class="d-inline">
@@ -51,17 +61,26 @@
                         }
                         else
                         {
-
                             <span class="text-danger">Hết bàn trống</span>
                         }
                     }
                     else
                     {
-                        <span class="badge bg-success">Bàn: @r.AssignedTable</span>
-                        <form method="post" action="/Staff/ReleaseTableReservation" class="d-inline ms-2">
-                            <input type="hidden" name="reservationId" value="@r.Id" />
-                            <button class="btn btn-sm btn-outline-danger" type="submit">Hủy gán</button>
-                        </form>
+                        // ĐÃ có bàn
+                        if (isClosed && !order?.IsCompleted == true)
+                        {
+                            @* Order đã Closed: hiển thị bàn nhưng KHÔNG cho hủy gán *@
+                            <span class="badge bg-secondary">Bàn: @r.AssignedTable (đơn đã closed)</span>
+                        }
+                        else
+                        {
+                            @* Order chưa closed hoặc đã completed: cho phép hủy gán như cũ *@
+                            <span class="badge bg-success">Bàn: @r.AssignedTable</span>
+                            <form method="post" action="/Staff/ReleaseTableReservation" class="d-inline ms-2">
+                                <input type="hidden" name="reservationId" value="@r.Id" />
+                                <button class="btn btn-sm btn-outline-danger" type="submit">Hủy gán</button>
+                            </form>
+                        }
                     }
                 </td>
 
@@ -95,16 +114,11 @@
                         <span class="text-muted">Chưa có order</span>
                     }
                 </td>
+            </tr>
 
-                @{
-                    Order order = null;
-                    if (map != null && map.TryGetValue(r.Id, out var od))
-                    {
-                        order = od;
-                    }
-                }
-                @if (order != null)
-                {
+            @* ===== HÀNG CHI TIẾT ORDER (NẾU CÓ) ===== *@
+            @if (order != null)
+            {
                 <tr>
                     <td colspan="7" style="background:#fafafa;">
                         <div style="font-weight:600;">Order của bàn đặt này:</div>
@@ -119,7 +133,9 @@
                         </ul>
                         <div><strong>Tổng:</strong> @order.Total.ToString("N0") VND</div>
                         <a class="btn btn-sm btn-outline-secondary" target="_blank" href="/Staff/PrintBill?id=@order.Id">In bill</a>
-                        @if (!order.IsCompleted)
+
+                        @* NÚT HOÀN TẤT: chỉ hiện khi order đã Closed nhưng CHƯA Completed *@
+                        @if (!order.IsCompleted && isClosed)
                         {
                             <form method="post" action="/Staff/CompletedOrder" class="d-inline ms-2">
                                 <input type="hidden" name="id" value="@order.Id" />
@@ -130,8 +146,6 @@
                     </td>
                 </tr>
             }
-
-            </tr>
         }
     </tbody>
 </table>

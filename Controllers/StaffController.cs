@@ -106,7 +106,6 @@ namespace BTL_LTW.Controllers
 
             return View(o);
         }
-
         [HttpPost]
         public IActionResult CompletedOrder(string id, string? returnTo)
         {
@@ -119,7 +118,6 @@ namespace BTL_LTW.Controllers
             o.IsCompleted = true;
             o.Status = "Completed";
 
-            // Giải phóng bàn nếu có
             if (!string.IsNullOrEmpty(o.AssignedTable))
             {
                 var table = _db.TableInfos.FirstOrDefault(t => t.Id == o.AssignedTable);
@@ -127,16 +125,21 @@ namespace BTL_LTW.Controllers
                 {
                     table.IsOccuped = false;
                     table.OccupiedById = null;
+                    table.Since = null;
                 }
+
+                o.AssignedTable = null;
             }
 
             _db.SaveChanges();
 
             if (!string.IsNullOrEmpty(returnTo) && returnTo == "reservations")
-                return RedirectToAction(nameof(Reservations));
+                return RedirectToAction("Reservations");
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index");
         }
+
+
 
         // ================== RESERVATIONS (ĐẶT BÀN) ==================
 
@@ -347,5 +350,41 @@ namespace BTL_LTW.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpPost]
+        public IActionResult ReleaseTableOrder(string orderId)
+        {
+            if (!IsAuthenticated())
+                return Unauthorized();
+
+            if (string.IsNullOrWhiteSpace(orderId))
+                return RedirectToAction(nameof(Index));
+
+            // Tìm order
+            var order = _db.Orders.FirstOrDefault(o => o.Id == orderId);
+            if (order == null)
+                return RedirectToAction(nameof(Index));
+
+            if (!string.IsNullOrEmpty(order.AssignedTable))
+            {
+                // Tìm bàn đó
+                var table = _db.Tables.FirstOrDefault(t => t.Id == order.AssignedTable);
+                if (table != null)
+                {
+                    table.IsOccuped = false;
+                    table.OccupiedById = null;
+                    table.Since = null;
+                }
+
+                // Bỏ thông tin bàn khỏi order
+                order.AssignedTable = null;
+            }
+
+            _db.SaveChanges();
+
+            // Load lại Staff/Index -> danh sách bàn sẽ về trạng thái mặc định
+            return RedirectToAction(nameof(Index));
+        }
+
+
     }
 }

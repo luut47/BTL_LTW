@@ -14,6 +14,8 @@
 <p>
     <a class="btn btn-outline-primary" href="/Staff/Reservations">Xem danh sách đặt bàn</a>
 </p>
+<button id="btnKitchen" type="button" class="btn btn-outline-primary">Kitchen</button>
+
 
 <div style="display:flex;gap:18px;">
     <div style="flex:1;">
@@ -83,17 +85,25 @@
                     @* Giải phóng bàn (nếu đã có bàn) *@
                     @if (!string.IsNullOrEmpty(o.AssignedTable))
                     {
-                        <form method="post" action="/Staff/ReleaseTable" class="d-inline ms-2">
-                            <input type="hidden" name="tableId" value="@o.AssignedTable" />
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Giải phóng bàn @o.AssignedTable</button>
+                        <form method="post"
+                              asp-controller="Staff"
+                              asp-action="ReleaseTableOrder"
+                              class="d-inline ms-2">
+                            <input type="hidden" name="orderId" value="@o.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                Giải phóng bàn @o.AssignedTable
+                            </button>
                         </form>
                     }
 
                     <a class="btn btn-sm btn-outline-secondary ms-2" href="/Staff/PrintBill?id=@o.Id" target="_blank">In bill</a>
 
+                    @{
+                        var statusLower = (o.Status ?? "").ToLower();
+                    }
+
                     @if (!o.IsCompleted)
                     {
-                        @* ĐỔI route này cho đúng với controller của bạn: CompletedOrder hay CompleteOrder *@
                         <form method="post" action="/Staff/CompletedOrder" class="d-inline ms-2">
                             <input type="hidden" name="id" value="@o.Id" />
                             <button type="submit" class="btn btn-sm btn-success">Hoàn tất</button>
@@ -125,6 +135,11 @@
 </div>
 @section Scripts {
     <script>
+        if(btnKitchen){
+              btnKitchen.addEventListener('click', ()=>{
+                  window.location.href ='/Kitchen';
+              });
+          }
         function reloadResv(){
           fetch('/Staff/ReservationsPartial', { headers: { 'X-Requested-With':'XMLHttpRequest' }})
             .then(r => r.text())

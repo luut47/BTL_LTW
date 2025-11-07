@@ -1,9 +1,4 @@
-CREATE TABLE [dbo].[TableInfo] (
-    [Id]           NVARCHAR(50)  NOT NULL PRIMARY KEY, -- A1 -> A20
-    [IsOccuped]    BIT           NOT NULL,
-    [OccupiedById] NVARCHAR(50)  NULL,
-    [Since]        DATETIME2     NULL
-);
+
 select * from TableInfo;
 select * from MenuCategories;
 select * from MenuItems;
@@ -11,7 +6,6 @@ select * from Orders;
 select * from Reservations;
 select * from OrderItems;
 
-SELECT Id, Name FROM MenuCategories;
 INSERT INTO MenuCategories (Name)
 VALUES
 (N'Khai vị'),
@@ -96,3 +90,15 @@ UPDATE TableInfo SET Id = 'A06' WHERE Id = 'A6';
 UPDATE TableInfo SET Id = 'A07' WHERE Id = 'A7';
 UPDATE TableInfo SET Id = 'A08' WHERE Id = 'A8';
 UPDATE TableInfo SET Id = 'A09' WHERE Id = 'A9';
+
+-- Xóa chi tiết món trước (vì phụ thuộc Orders)
+DELETE FROM OrderItems;
+
+-- Xóa đơn hàng
+DELETE FROM Orders;
+
+-- Xóa đặt bàn
+DELETE FROM Reservations;
+
+ALTER TABLE Reservations 
+ALTER COLUMN Note nvarchar(max) null;

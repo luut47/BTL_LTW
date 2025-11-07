@@ -1,11 +1,13 @@
 ﻿@{
     ViewData["Title"] = "Kitchen";
 }
-<h2>Kitchen - Orders</h2>
 
+
+<h2>Kitchen - Orders</h2>
 <div id="kitchen-root">Loading...</div>
 
 @section Scripts {
+        
     <script>
         function reloadKitchen() {
           fetch('/Kitchen/ListPartial', { headers: { 'X-Requested-With':'XMLHttpRequest' } })

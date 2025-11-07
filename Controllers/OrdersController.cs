@@ -120,7 +120,7 @@ namespace BTL_LTW.Controllers
             if (order.Items.All(i => i.Status == "Served"))
             {
                 order.Status = "Closed";   // giống FileStorage.UpdateOrderItemStatus
-                order.IsCompleted = true;       // có thể set true luôn cho tiện
+                order.IsCompleted = false;       // có thể set true luôn cho tiện
             }
 
             _db.SaveChanges();
