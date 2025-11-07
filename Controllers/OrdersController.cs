@@ -1,26 +1,24 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BTL_LTW.Models;
-using BTL_LTW.Services;
-using System.Text.Json;
+using BTL_LTW.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace BTL_LTW.Controllers
 {
     public class OrdersController : Controller
     {
-        private readonly IStorage _storage;
-        private readonly IWebHostEnvironment _env;
-        private readonly JsonSerializerOptions _opt = new() { WriteIndented = true, PropertyNameCaseInsensitive = true };
+        private readonly RestaurantDb _db;
 
-        public OrdersController(IStorage sto, IWebHostEnvironment env)
+        public OrdersController(RestaurantDb db, IWebHostEnvironment env)
         {
-            _storage = sto;
-            _env = env;
-        } 
+            _db = db;
+        }
 
         [HttpGet]
         public IActionResult Get(string id)
         {
-            var o = _storage.GetOrder(id);
+            var o = _db.Orders.Include(x => x.Items).FirstOrDefault(x => x.Id == id);
+
             if (o == null) return NotFound();
             return Ok(o);
         }
@@ -28,7 +26,7 @@ namespace BTL_LTW.Controllers
         [HttpGet]
         public IActionResult List()
         {
-            var orders = _storage.GetOrders();
+            var orders = _db.Orders.Include(o => o.Items).OrderByDescending(o => o.CreatedAt).ToList();
             return Ok(orders);
         }
 
@@ -41,37 +39,57 @@ namespace BTL_LTW.Controllers
 
             try
             {
-                // ưu tiên lấy ReservationId từ body nếu bạn đã thêm vào model
-                if (!string.IsNullOrWhiteSpace(dto?.ReservationId))
+                // nếu body có ReservationId thì ưu tiên
+                if (!string.IsNullOrWhiteSpace(dto.ReservationId))
                     reservationId = dto.ReservationId;
 
-                var saved = _storage.CreateOrder(dto);
+                // Lấy menu từ DB 
+                var menuDict = _db.MenuItems.ToDictionary(m => m.Id, m => m);
 
-                // nếu có reservationId -> cập nhật lại file reservations.json
-                if (!string.IsNullOrWhiteSpace(reservationId))
+                decimal total = 0m;
+
+                // Validate + gán giá / tên món server-side (chống sửa giá từ client)
+                foreach (var it in dto.Items)
                 {
-                    var dataDir = Path.Combine(_env.ContentRootPath, "data");
-                    var file = Path.Combine(dataDir, "reservations.json");
-                    var list = new List<Reservation>();
+                    if (!menuDict.TryGetValue(it.MenuItemId, out var mi))
+                        return BadRequest($"Menu item không tồn tại (id={it.MenuItemId})");
 
-                    if (System.IO.File.Exists(file))
-                    {
-                        var txt = System.IO.File.ReadAllText(file);
-                        list = System.Text.Json.JsonSerializer.Deserialize<List<Reservation>>(txt, _opt) ?? new();
-                    }
+                    it.MenuItemName = mi.Name;
+                    it.UnitPrice = mi.Price;
+                    if (it.Qty <= 0) it.Qty = 1;
 
-                    var r = list.FirstOrDefault(x => x.Id == reservationId);
-                    if (r != null)
-                    {
-                        r.LinkOrderId = saved.Id;      // thuộc tính bạn dùng để hiển thị cột Hóa đơn
-                                                         // nếu Reservation có AssignedTable thì có thể set luôn saved.AssignedTable = r.AssignedTable;
-                    }
-
-                    System.IO.File.WriteAllText(file,
-                        System.Text.Json.JsonSerializer.Serialize(list, _opt));
+                    total += it.UnitPrice * it.Qty;
                 }
 
-                return CreatedAtAction(nameof(Get), new { id = saved.Id }, saved);
+                dto.Total = total;
+                dto.Id = Guid.NewGuid().ToString();
+                dto.CreatedAt = DateTime.UtcNow;
+                dto.Status = "Pending";
+                dto.IsCompleted = false;
+
+                // Nếu gắn với Reservation
+                if (!string.IsNullOrWhiteSpace(reservationId))
+                {
+                    dto.ReservationId = reservationId;
+
+                    var r = _db.Reservations.FirstOrDefault(x => x.Id == reservationId);
+                    if (r != null)
+                    {
+                        // Link Order với Reservation
+                        r.LinkOrderId = dto.Id;
+
+                        // Nếu reservation đã có bàn -> gán luôn vào order
+                        if (!string.IsNullOrWhiteSpace(r.AssignedTable) && string.IsNullOrWhiteSpace(dto.AssignedTable))
+                        {
+                            dto.AssignedTable = r.AssignedTable;
+                        }
+                    }
+                }
+
+                _db.Orders.Add(dto);
+                _db.SaveChanges();
+
+                return CreatedAtAction(nameof(Get), new { id = dto.Id }, dto);
             }
             catch (Exception ex)
             {
@@ -83,14 +101,38 @@ namespace BTL_LTW.Controllers
         [HttpPatch]
         public IActionResult UpdateItemStatus(string orderId, int menuItemId, [FromQuery] string status)
         {
-            var ok = _storage.UpdateOrderItemStatus(orderId, menuItemId, status);
-            if (!ok) return NotFound();
+            if (string.IsNullOrWhiteSpace(orderId))
+                return BadRequest();
+
+            var order = _db.Orders.Include(o => o.Items).FirstOrDefault(o => o.Id == orderId);
+
+            if (order == null)
+                return NotFound();
+
+            var item = order.Items.FirstOrDefault(i => i.MenuItemId == menuItemId);
+           
+            if (item == null)
+                return NotFound();
+
+            item.Status = status;
+
+            // Nếu tất cả món đã Served → đóng order
+            if (order.Items.All(i => i.Status == "Served"))
+            {
+                order.Status = "Closed";   // giống FileStorage.UpdateOrderItemStatus
+                order.IsCompleted = true;       // có thể set true luôn cho tiện
+            }
+
+            _db.SaveChanges();
             return Ok();
         }
+
+        // GET /Orders/Status?id=...
         [HttpGet]
         public IActionResult Status(string id)
         {
-            var o = _storage.GetOrder(id);
+            var o = _db.Orders.Include(x => x.Items).FirstOrDefault(x => x.Id == id);
+
             if (o == null) return NotFound();
 
             var dto = new
@@ -99,7 +141,8 @@ namespace BTL_LTW.Controllers
                 status = o.Status,
                 total = o.Total,
                 isCompleted = o.IsCompleted,
-                items = o.Items.Select(i => new {
+                items = o.Items.Select(i => new
+                {
                     i.MenuItemId,
                     i.MenuItemName,
                     i.Qty,
@@ -107,6 +150,7 @@ namespace BTL_LTW.Controllers
                     status = i.Status
                 }).ToList()
             };
+
             return Json(dto);
         }
 

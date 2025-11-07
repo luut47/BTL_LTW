@@ -1,12 +1,18 @@
-using BTL_LTW.Services;
+using BTL_LTW.Data;
+using Microsoft.EntityFrameworkCore;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// DbContext
+builder.Services.AddDbContext<RestaurantDb>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
-builder.Services.AddSingleton<IStorage, FileStorage>();
+//builder.Services.AddSingleton<IStorage, FileStorage>();
+
 
 var app = builder.Build();
 

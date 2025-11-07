@@ -2,6 +2,7 @@
 {
     public class OrderItem
     {
+        public int OrderItemId { get; set; }
         public int MenuItemId { get; set; }
         public string? MenuItemName { get; set; }
         public int Qty { get; set; } = 1;

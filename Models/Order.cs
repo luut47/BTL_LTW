@@ -2,7 +2,7 @@
 {
     public class Order
     {
-        public string? Id { get; set; }
+        public string Id { get; set; }
         public string? TableToken { get; set; }
         public string? OrderToken { get; set; }
         public string? AssignedTable { get; set; }

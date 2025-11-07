@@ -1,54 +1,65 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BTL_LTW.Models;
-using System.Text.Json;
+using BTL_LTW.Data;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
 
 namespace BTL_LTW.Controllers
 {
     public class ReservationController : Controller
     {
-        private readonly IWebHostEnvironment _env;
-        private readonly JsonSerializerOptions _opt = new() { WriteIndented = true, PropertyNameCaseInsensitive = true };
+        private readonly RestaurantDb _db;
 
-        public ReservationController(IWebHostEnvironment env)
+        public ReservationController(RestaurantDb db)
         {
-            _env = env;
+            _db = db;
         }
 
         [HttpPost]
         public IActionResult Create([FromForm] Reservation model)
         {
-            if (model == null) return BadRequest("Dữ liệu rỗng");
+            if (model == null)
+                return BadRequest("Dữ liệu rỗng");
+
             if (string.IsNullOrWhiteSpace(model.CustomerName) || string.IsNullOrWhiteSpace(model.Phone))
                 return BadRequest("Vui lòng nhập tên và số điện thoại.");
 
-            var dataDir = Path.Combine(_env.ContentRootPath, "data");
-            if (!Directory.Exists(dataDir)) Directory.CreateDirectory(dataDir);
-
-            var file = Path.Combine(dataDir, "reservations.json");
-            List<Reservation> list;
-            if (System.IO.File.Exists(file))
-            {
-                try
-                {
-                    var txt = System.IO.File.ReadAllText(file);
-                    list = JsonSerializer.Deserialize<List<Reservation>>(txt, _opt) ?? new List<Reservation>();
-                }
-                catch
-                {
-                    list = new List<Reservation>();
-                }
-            }
-            else
-            {
-                list = new List<Reservation>();
-            }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
             model.Id = Guid.NewGuid().ToString();
-            model.CreatedAt = DateTime.UtcNow;
-            list.Add(model);
+            model.CreatedAt = DateTime.UtcNow; 
 
-            System.IO.File.WriteAllText(file, JsonSerializer.Serialize(list, _opt));
+            _db.Reservations.Add(model);
+            _db.SaveChanges();  
+
             return Ok(new { success = true, id = model.Id });
+        }
+
+        [HttpGet]
+        public IActionResult List()
+        {
+            var reservations = _db.Reservations
+                                  .OrderByDescending(r => r.CreatedAt)
+                                  .ToList();  
+
+            return Ok(reservations);
+        }
+
+        [HttpGet]
+        public IActionResult Get(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest("Id không hợp lệ.");
+
+            var reservation = _db.Reservations
+                                 .FirstOrDefault(r => r.Id == id);  
+
+            if (reservation == null)
+                return NotFound();
+
+            return Ok(reservation);
         }
     }
 }

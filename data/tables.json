@@ -2,56 +2,56 @@
   {
     "Id": "A1",
     "IsOccuped": true,
-    "OccupiedById": "RES:d3f725b5-b48a-4a06-9f49-2185ae540b34",
-    "Since": "2025-11-06T02:57:05.6250455Z"
+    "OccupiedById": "RES:50e50511-9853-4a05-a08d-a6996888eff8",
+    "Since": "2025-11-07T07:52:03.8112177Z"
   },
   {
     "Id": "A2",
-    "IsOccuped": true,
-    "OccupiedById": "RES:1d5e9cc3-2d0f-4912-8a67-f6f2cbb56118",
-    "Since": "2025-11-06T02:57:06.3091926Z"
+    "IsOccuped": false,
+    "OccupiedById": null,
+    "Since": null
   },
   {
     "Id": "A3",
-    "IsOccuped": true,
-    "OccupiedById": "RES:7474d7b2-f278-466b-86c2-556630ad27b3",
-    "Since": "2025-11-06T02:58:46.1051144Z"
+    "IsOccuped": false,
+    "OccupiedById": null,
+    "Since": null
   },
   {
     "Id": "A4",
-    "IsOccuped": true,
-    "OccupiedById": "RES:4f4ad43a-ea58-4f86-b0fc-fdee6237d3c8",
-    "Since": "2025-11-06T02:59:38.139253Z"
+    "IsOccuped": false,
+    "OccupiedById": null,
+    "Since": null
   },
   {
     "Id": "A5",
-    "IsOccuped": true,
-    "OccupiedById": "RES:0d4191f0-2330-42db-b45a-b445475d4a4d",
-    "Since": "2025-11-06T03:14:36.2863382Z"
+    "IsOccuped": false,
+    "OccupiedById": null,
+    "Since": null
   },
   {
     "Id": "A6",
-    "IsOccuped": true,
-    "OccupiedById": "RES:9883cd39-edca-413a-bad3-b1ff8adb24ca",
-    "Since": "2025-11-06T03:15:16.14782Z"
+    "IsOccuped": false,
+    "OccupiedById": null,
+    "Since": null
   },
   {
     "Id": "A7",
-    "IsOccuped": true,
-    "OccupiedById": "RES:e1ba5224-a654-43f2-9c27-572bade8de4b",
-    "Since": "2025-11-06T03:18:13.2426092Z"
+    "IsOccuped": false,
+    "OccupiedById": null,
+    "Since": null
   },
   {
     "Id": "A8",
-    "IsOccuped": true,
-    "OccupiedById": "RES:dc2ca15a-2489-44fe-aae0-3469e7e4d835",
-    "Since": "2025-11-06T03:18:37.9454578Z"
+    "IsOccuped": false,
+    "OccupiedById": null,
+    "Since": null
   },
   {
     "Id": "A9",
-    "IsOccuped": true,
-    "OccupiedById": "RES:82df86f5-396c-425f-af2e-e27186b10a08",
-    "Since": "2025-11-06T03:21:48.6584187Z"
+    "IsOccuped": false,
+    "OccupiedById": null,
+    "Since": null
   },
   {
     "Id": "A10",
