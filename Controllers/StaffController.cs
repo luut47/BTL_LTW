@@ -139,6 +139,33 @@ namespace BTL_LTW.Controllers
             return RedirectToAction("Index");
         }
 
+        // ================== PAYMENT ==================
+        [HttpPost]
+        public IActionResult ProcessPayment(string id, string method)
+        {
+            if (!IsAuthenticated())
+                return RedirectToAction(nameof(Login));
+
+            if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(method))
+                return BadRequest("Thiếu thông tin thanh toán");
+
+            var order = _db.Orders.FirstOrDefault(o => o.Id == id);
+            if (order == null) return NotFound();
+
+            // Cập nhật thông tin thanh toán
+            order.IsPaid = true;
+            order.PaymenMethod = method; // "cash" hoặc "bank"
+
+            _db.SaveChanges();
+
+            TempData["PaymentMessage"] =
+                method == "cash"
+                ? "Đã thanh toán bằng tiền mặt."
+                : "Đã thanh toán bằng chuyển khoản.";
+
+            // quay lại trang in bill để xem lại
+            return RedirectToAction(nameof(PrintBill), new { id = order.Id });
+        }
 
 
         // ================== RESERVATIONS (ĐẶT BÀN) ==================

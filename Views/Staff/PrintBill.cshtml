@@ -34,11 +34,59 @@
         </tbody>
     </table>
     <hr />
-    <div style="text-align:right;font-size:18px;"><strong>Tổng: @Model.Total.ToString("N0") VND</strong></div>
-    <div style="margin-top:12px;">Phương thức thanh toán: @Model.PaymenMethod ?? "Chưa chọn"</div>
+    <div style="text-align:right;font-size:18px;">
+        <strong>Tổng: @Model.Total.ToString("N0") VND</strong>
+    </div>
+
+    <div style="margin-top:12px;">
+        <strong>Trạng thái thanh toán:</strong>
+        @if (Model.IsPaid)
+        {
+            <span style="color:green;">
+                Đã thanh toán (@(Model.PaymenMethod ?? "Không rõ"))
+            </span>
+        }
+        else
+        {
+            <span style="color:red;">Chưa thanh toán</span>
+        }
+    </div>
+
+    @* Thông báo sau khi thanh toán *@
+    @if (TempData["PaymentMessage"] != null)
+    {
+        <div style="margin-top:8px;padding:8px;border:1px solid #cce5ff;background:#e9f5ff;color:#004085;">
+            @TempData["PaymentMessage"]
+        </div>
+    }
 
     <div style="margin-top:20px;">
         <button onclick="window.print()">In hoá đơn</button>
-        <a href="/Staff">Quay lại</a>
+
+        @* Nút thanh toán: chỉ hiện khi chưa thanh toán *@
+        @if (!Model.IsPaid)
+        {
+            <form asp-controller="Staff"
+                  asp-action="ProcessPayment"
+                  method="post"
+                  style="display:inline-block;margin-left:8px;">
+                <input type="hidden" name="id" value="@Model.Id" />
+
+                <button type="submit"
+                        name="method"
+                        value="cash"
+                        style="margin-right:6px;">
+                    Thanh toán tiền mặt
+                </button>
+
+                <button type="submit"
+                        name="method"
+                        value="bank">
+                    Thanh toán chuyển khoản
+                </button>
+            </form>
+        }
+
+        <a href="/Staff" style="margin-left:12px;">Quay lại</a>
     </div>
 </div>

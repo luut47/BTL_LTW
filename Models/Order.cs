@@ -17,5 +17,6 @@
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string? PaymenMethod { get; set; }
         public string? ReservationId { get; set; }
+        public bool IsPaid { get; set; } = false;
     }
 }

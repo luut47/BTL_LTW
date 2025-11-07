@@ -105,3 +105,7 @@ ALTER COLUMN Note nvarchar(max) null;
 
 ALTER TABLE Reservations 
 ALTER COLUMN Email nvarchar(max) null;
+
+ALTER TABLE Orders
+ADD IsPaid BIT NOT NULL DEFAULT 0,
+    PaymentMethod NVARCHAR(50) NULL;
