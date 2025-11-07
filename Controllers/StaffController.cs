@@ -22,7 +22,7 @@ namespace BTL_LTW.Controllers
         [HttpPost]
         public IActionResult Login(string username, string password)
         {
-            if (username == "staff" && password == "abc123")
+            if (username == "staff" && password == "123")
             {
                 HttpContext.Session.SetString("isStaff", "1");
                 return RedirectToAction(nameof(Index));
