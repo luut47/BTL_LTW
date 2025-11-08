@@ -59,6 +59,7 @@ namespace BTL_LTW.Controllers
             var orders = _db.Orders
                             .Where(o => string.IsNullOrEmpty(o.ReservationId))
                             .OrderByDescending(o => o.CreatedAt)
+                            .Include(o => o.Items)
                             .ToList();
 
             var tables = _db.TableInfos.ToList();
@@ -99,7 +100,7 @@ namespace BTL_LTW.Controllers
             if (!IsAuthenticated())
                 return RedirectToAction(nameof(Login));
 
-            var o = _db.Orders
+            var o = _db.Orders.Include(x => x.Items)
                        .FirstOrDefault(x => x.Id == id);
 
             if (o == null) return NotFound();
@@ -183,7 +184,7 @@ namespace BTL_LTW.Controllers
             var tables = _db.TableInfos.ToList();
             ViewBag.Tables = tables;
 
-            var allOrders = _db.Orders.ToList();
+            var allOrders = _db.Orders.Include(o => o.Items).ToList();
 
             // map: reservationId -> order theo LinkOrderId
             var ordersByReservation = new Dictionary<string, Order>();
@@ -216,7 +217,7 @@ namespace BTL_LTW.Controllers
             var tables = _db.TableInfos.ToList();
             ViewBag.Tables = tables;
 
-            var allOrders = _db.Orders.ToList();
+            var allOrders = _db.Orders.Include(o => o.Items).ToList();
             var ordersByReservation = new Dictionary<string, Order>();
 
             foreach (var r in reservations)

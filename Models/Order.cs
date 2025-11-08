@@ -18,5 +18,6 @@
         public string? PaymenMethod { get; set; }
         public string? ReservationId { get; set; }
         public bool IsPaid { get; set; } = false;
+        //public string? BankPaymentLocation { get; set; }
     }
 }

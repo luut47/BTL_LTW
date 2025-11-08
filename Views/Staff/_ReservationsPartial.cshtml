@@ -128,7 +128,7 @@
                         <ul>
                             @foreach (var it in order.Items)
                             {
-                                <li>@it.MenuItemName - x@it.Qty - @it.UnitPrice.ToString("N0")</li>
+                                <li>@it.MenuItemName - @it.Qty - @it.UnitPrice.ToString("N0")</li>
                             }
                         </ul>
                         <div><strong>Tổng:</strong> @order.Total.ToString("N0") VND</div>

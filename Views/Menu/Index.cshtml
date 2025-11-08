@@ -217,7 +217,7 @@
             localStorage.removeItem('cart');
             refreshCartUI();
             if (typeof closePanel === 'function') closePanel();
-            window.location.href = '/Staff';
+            window.location.href = '/Home';
 
           } catch(err) {
             alert('Lỗi gửi order: ' + (err.message || err));
