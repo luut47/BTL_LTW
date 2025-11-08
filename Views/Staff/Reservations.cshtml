@@ -4,54 +4,6 @@
 
 <div id="resv-root">Đang tải...</div>
 
-
 @section Scripts {
-    <script>
-        if(btnKitchen){
-              btnKitchen.addEventListener('click', ()=>{
-                  window.location.href ='/Kitchen';
-              });
-          }
-        function reloadResv(){
-          fetch('/Staff/ReservationsPartial', { headers: { 'X-Requested-With':'XMLHttpRequest' }})
-            .then(r => r.text())
-            .then(html => {
-              const el = document.getElementById('resv-root');
-              if (el) el.innerHTML = html;
-            })
-            .catch(err => console.error('reloadResv error', err));
-        }
-
-        // tải lần đầu và sau đó 8s/lần
-        reloadResv();
-        setInterval(reloadResv, 8000);
-
-        // ====== NÚT "CHỌN ĐỒ" → /Menu ======
-        document.addEventListener('click', function (e) {
-            const btn = e.target.closest('.btn-choose-food'); // đúng class trong partial
-            if (!btn) return;
-
-            e.preventDefault();
-
-            const resid = btn.dataset.id;
-            const name  = btn.dataset.name || '';
-            const phone = btn.dataset.phone || '';
-            const email = btn.dataset.email || '';
-            const table = btn.dataset.table || '';
-
-            // Lưu thông tin khách + bàn cho trang Menu
-            const customer = { name: name, phone: phone, address: email, token: table };
-            try {
-                localStorage.setItem('customer', JSON.stringify(customer));
-                localStorage.setItem('currentReservationId', resid);
-                // Xoá giỏ cũ nếu muốn
-                localStorage.removeItem('cart');
-            } catch (err) {
-                console.error('localStorage error', err);
-            }
-
-            // Điều hướng sang Menu để chọn đồ
-            window.location.href = '/Menu';
-        });
-    </script>
+    <script src="~/js/staff-reservations.js"></script>
 }

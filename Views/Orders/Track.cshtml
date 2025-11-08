@@ -1,63 +1,46 @@
-﻿@{
-    ViewBag.Title = "Theo dõi đơn";
-    var currentOrderId = (string)ViewBag.OrderId;
+﻿@model BTL_LTW.Models.Order   
+
+@{
+    ViewData["Title"] = "Theo dõi đơn";
 }
-<h2>Theo dõi đơn #@currentOrderId</h2>
 
-<div id="order-summary"></div>
-<div id="order-items"></div>
+<h2>Theo dõi đơn hàng</h2>
 
-<script>
-    const orderId = '@currentOrderId';
-    const summaryEl = document.getElementById('order-summary');
-    const itemsEl = document.getElementById('order-items');
+<div id="order-track-root">
 
-    function statusPercent(s) {
-      // map status -> %; sửa theo enum/chuỗi của bạn
-      switch((s || '').toString()) {
-        case 'Pending':    return 25;
-        case 'Preparing':  return 50;
-        case 'Ready':      return 75;
-        case 'Served':     return 100;
-        case 'Completed':  return 100;
-        default:           return 0;
-      }
-    }
+    <div class="order-track-card">
+        <div><strong>Mã đơn:</strong> @Model.TableToken</div>
+        <div><strong>Trạng thái:</strong> <span id="order-status-text">@Model.Status</span></div>
+        <div><strong>Thời gian tạo:</strong> @Model.CreatedAt.ToLocalTime():g</div>
 
-    function render(data) {
-      summaryEl.innerHTML = `
-        <div><b>Trạng thái đơn:</b> ${data.status}</div>
-        <div><b>Tổng tiền:</b> ${data.total.toLocaleString()} đ</div>
-        <div class="progress" style="height:10px;margin:6px 0;">
-          <div class="progress-bar" role="progressbar"
-               style="width:${statusPercent(data.status)}%"></div>
+        <h4>Chi tiết món</h4>
+        <ul id="order-items-list">
+            @foreach (var it in Model.Items)
+            {
+                <li>@it.MenuItemName - x@it.Qty</li>
+            }
+        </ul>
+
+        <div class="order-total-row">
+            <strong>Tổng: @Model.Total.ToString("N0") VND</strong>
         </div>
-      `;
 
-      itemsEl.innerHTML = data.items.map(it => {
-        const pct = statusPercent(it.status);
-        return `
-          <div style="margin:10px 0;">
-            <div><b>${it.MenuItemName}</b> x${it.Qty} — ${it.status}</div>
-            <div class="progress" style="height:8px;">
-              <div class="progress-bar" role="progressbar" style="width:${pct}%"></div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
+        <div id="order-track-extra">
+            @* chỗ này JS có thể update trạng thái: đang chế biến / đã xong / closed *@
+        </div>
+    </div>
+</div>
 
-    function tick() {
-      fetch('/Orders/Status?id=' + encodeURIComponent(orderId))
-        .then(r => r.ok ? r.json() : Promise.reject(r.status))
-        .then(data => {
-          render(data);
-          if (data.isCompleted) clearInterval(poller);
-        })
-        .catch(err => console.error('poll error', err));
-    }
+@section Styles {
+    <link rel="stylesheet" href="~/css/orders-track.css" />
+}
 
-    // gọi ngay và lặp 4s/lần
-    tick();
-    const poller = setInterval(tick, 4000);
-</script>
+@section Scripts {
+    <script>
+        // truyền mã đơn cho JS nếu cần poll
+        window.orderTrackConfig = {
+            orderId: '@Model.Id'
+        };
+    </script>
+    <script src="~/js/orders-track.js"></script>
+}

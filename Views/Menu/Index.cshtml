@@ -7,281 +7,72 @@
 <h2>Menu</h2>
 
 <div id="menuList">
-    @* Hiển thị theo category *@
     @foreach (var cat in Model)
     {
-        <h3>@cat.Name</h3>
-        <div style="margin-bottom:15px;">
-            @foreach (var item in cat.Items)
-            {
-                <div style="border:1px solid #eee;padding:8px;margin-bottom:8px;border-radius:3px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <strong>@item.Name</strong> - @item.Price.ToString("N0") VND
-                        </div>
-                        <div>
-                            <button class="btn-add" data-id="@item.Id" data-name="@item.Name" data-price="@item.Price">Thêm</button>
+        <div class="menu-category">
+            <h3>@cat.Name</h3>
+            <div class="menu-category-items">
+                @foreach (var item in cat.Items)
+                {
+                    <div class="menu-item-card">
+                        <div class="menu-item-main">
+                            <div>
+                                <strong>@item.Name</strong> - @item.Price.ToString("N0") VND
+                            </div>
+                            <div>
+                                <button class="btn btn-add"
+                                        data-id="@item.Id"
+                                        data-name="@item.Name"
+                                        data-price="@item.Price">
+                                    Thêm
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            }
+                }
+            </div>
         </div>
     }
 </div>
 
 @* Nút Mở giỏ cố định góc phải dưới *@
-<button id="openCartBtnFloating" title="Mở giỏ" style="position:fixed; right:18px; bottom:18px; z-index:10050; padding:12px 14px; border-radius:50%; background:#ff7a00; color:#fff; border:none; box-shadow:0 6px 18px rgba(0,0,0,.15);">
+<button id="openCartBtnFloating" title="Mở giỏ" class="cart-floating-btn">
     🛒 <span id="floatingCount">0</span>
 </button>
 
 @* Panel slide-in bên phải *@
-<div id="cartPanel" style="position:fixed; right:-420px; top:0; height:100vh; width:400px; background:#fff; box-shadow:-6px 0 18px rgba(0,0,0,.12); z-index:10060; transition:right .25s ease;">
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid #eee;">
-        <h3 style="margin:0;">Giỏ hàng</h3>
+<div id="cartPanel" class="cart-panel">
+    <div class="cart-panel-header">
+        <h3>Giỏ hàng</h3>
         <div>
             <button id="closeCartBtn" class="btn">Đóng</button>
         </div>
     </div>
 
-    <div id="cartItemsWrap" style="padding:12px; overflow:auto; height:calc(100vh - 180px);">
+    <div id="cartItemsWrap" class="cart-items-wrap">
         <!-- Các item sẽ render ở đây -->
-
     </div>
 
-    <div style="padding:12px; border-top:1px solid #eee;">
-        <div style="margin-bottom:8px;">Tổng: <strong id="cartTotal">0 VND</strong></div>
-        <label style="user-select:none;">
+    <div class="cart-panel-footer">
+        <div class="cart-total-row">Tổng: <strong id="cartTotal">0 VND</strong></div>
+        <label class="cart-takeaway-label">
             <input type="checkbox" id="takeawayChk" />
             Mang về (Takeaway)
         </label>
-        <div style="display:flex; gap:8px;">
-            <button id="clearCartBtn" class="btn btn-secondary" style="flex:1">Xóa giỏ</button>
-            <button id="confirmCartBtn" class="btn btn-primary" style="flex:1">Xác nhận món</button>
+        <div class="cart-footer-buttons">
+            <button id="clearCartBtn" class="btn btn-secondary">Xóa giỏ</button>
+            <button id="confirmCartBtn" class="btn btn-primary">Xác nhận món</button>
         </div>
-        <div style="margin-top:8px; font-size:12px; color:#666;">
+        <div class="cart-footer-note">
             Khi xác nhận, đơn hàng sẽ gửi về bếp và lưu vào hệ thống (kèm mã đơn & thông tin khách).
         </div>
     </div>
 </div>
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/menu.css" />
+}
+
 @section Scripts {
-    <script>
-        (function(){
-          const CART_KEY = 'cart';
-          const CUSTOMER_KEY = 'customer';
-
-          function getCart(){ try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); } catch { return []; } }
-          function saveCart(cart){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); refreshCartUI(); }
-          function getCustomer(){ try { return JSON.parse(localStorage.getItem(CUSTOMER_KEY) || 'null'); } catch { return null; } }
-
-          // update floating count & panel total
-          function refreshCartUI(){
-            const cart = getCart();
-            const count = cart.reduce((s,i)=> s + (i.qty||0), 0);
-            document.getElementById('floatingCount').innerText = count;
-            const total = cart.reduce((s,i)=> s + ( (i.unitPrice||0) * (i.qty||1) ), 0);
-            document.getElementById('cartTotal').innerText = new Intl.NumberFormat('vi-VN').format(total) + ' VND';
-            renderCartItems();
-          }
-
-          // render items inside panel
-          function renderCartItems(){
-            const wrap = document.getElementById('cartItemsWrap');
-            const cart = getCart();
-            wrap.innerHTML = '';
-            if(!cart || cart.length === 0){
-              wrap.innerHTML = '<div style="padding:12px;color:#666;">Giỏ trống</div>';
-              return;
-            }
-            cart.forEach((it, idx) => {
-              const div = document.createElement('div');
-              div.style.borderBottom = '1px solid #eee';
-              div.style.padding = '8px 0';
-              div.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <div>
-                    <div style="font-weight:600;">${escapeHtml(it.menuItemName || it.name || 'Unknown')}</div>
-                    <div style="color:#666;font-size:13px;">${new Intl.NumberFormat('vi-VN').format(it.unitPrice || it.price || 0)} VND</div>
-                  </div>
-                  <div style="text-align:right;">
-                    <div style="display:flex; gap:6px; align-items:center; justify-content:flex-end;">
-                      <button class="qty-dec" data-idx="${idx}">−</button>
-                      <div style="min-width:24px;text-align:center;">${it.qty||1}</div>
-                      <button class="qty-inc" data-idx="${idx}">+</button>
-                    </div>
-                    <div style="margin-top:6px;">
-                      <button class="btn-remove" data-idx="${idx}">Xóa</button>
-                    </div>
-                  </div>
-                </div>
-              `;
-              wrap.appendChild(div);
-            });
-
-            // attach handlers
-            wrap.querySelectorAll('.qty-inc').forEach(b => b.addEventListener('click', (e)=>{
-              const i = parseInt(e.currentTarget.dataset.idx);
-              const cart = getCart();
-              cart[i].qty = (cart[i].qty||1) + 1;
-              saveCart(cart);
-            }));
-            wrap.querySelectorAll('.qty-dec').forEach(b => b.addEventListener('click', (e)=>{
-              const i = parseInt(e.currentTarget.dataset.idx);
-              const cart = getCart();
-              cart[i].qty = Math.max(1, (cart[i].qty||1) - 1);
-              saveCart(cart);
-            }));
-            wrap.querySelectorAll('.btn-remove').forEach(b => b.addEventListener('click', (e)=>{
-              const i = parseInt(e.currentTarget.dataset.idx);
-              const cart = getCart();
-              cart.splice(i,1);
-              saveCart(cart);
-            }));
-          }
-
-          // escape for safe innerHTML
-          function escapeHtml(s){
-            if(!s) return '';
-            return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
-          }
-
-          // add to cart from menu buttons
-          function initAddButtons(){
-            document.querySelectorAll('.btn-add').forEach(b=>{
-              b.addEventListener('click', () => {
-                const id = parseInt(b.dataset.id);
-                const name = b.dataset.name;
-                const price = parseFloat(b.dataset.price) || 0;
-                const cart = getCart();
-                const found = cart.find(x => x.menuItemId === id);
-                if(found) found.qty = (found.qty||1) + 1;
-                else cart.push({ menuItemId: id, menuItemName: name, qty: 1, unitPrice: price });
-                saveCart(cart);
-              });
-            });
-          }
-        const panel = document.getElementById('cartPanel');        
-        function openPanel(){ panel.style.right = '0'; }           
-        function closePanel(){ panel.style.right = '-420px'; }     
-
-
-        async function confirmCart(){
-          const cart = getCart();
-          if(!cart || cart.length === 0){ alert('Giỏ rỗng'); return; }
-
-          const cust = getCustomer();
-          if (!cust || !cust.name || !cust.phone) {
-            alert('Thiếu thông tin khách (hãy quay lại/bấm Chọn đồ lại).');
-            return;
-          }
-
-          const token = cust.token ? cust.token
-                                   : ('C-' + Math.random().toString(36).slice(2,8).toUpperCase());
-          const isTakeaway    = document.getElementById('takeawayChk')?.checked || false;
-          const reservationId = localStorage.getItem('currentReservationId') || '';
-
-          const payload = {
-            tableToken: token,
-            customerName: cust.name || '',
-            customerPhone: cust.phone || '',
-            customerAddress: cust.address || '',
-            isTakeAway: isTakeaway,
-            ReservationId: reservationId || null,
-            items: cart.map(i => ({
-              menuItemId: i.menuItemId,
-              qty: i.qty || 1,
-              note: i.note || ''
-            }))
-          };
-
-          const btn = document.getElementById('confirmCartBtn');
-          try {
-            if (btn) { btn.disabled = true; btn.innerText = 'Đang gửi...'; }
-
-            const resp = await fetch('/Orders/Create', {
-              method: 'POST',
-              headers: { 'Content-Type':'application/json' },
-              body: JSON.stringify(payload)
-            });
-
-            if (!resp.ok) {
-              const text = await resp.text();
-              alert('Tạo order thất bại: ' + text);
-              return;
-            }
-
-            const data = await resp.json();
-            alert('Đã gửi bếp. Mã order: ' + (data.id || 'unknown'));
-
-            localStorage.removeItem('currentReservationId');
-            localStorage.removeItem('cart');
-            refreshCartUI();
-            if (typeof closePanel === 'function') closePanel();
-            window.location.href = '/Home';
-
-          } catch(err) {
-            alert('Lỗi gửi order: ' + (err.message || err));
-          } finally {
-            if (btn) { btn.disabled = false; btn.innerText = 'Xác nhận món'; }
-          }
-        }
-
-
-
-          // event bindings on DOM ready
-          document.addEventListener('DOMContentLoaded', () => {
-            initAddButtons();
-            document.getElementById('openCartBtnFloating').addEventListener('click', openPanel);
-            document.getElementById('closeCartBtn').addEventListener('click', closePanel);
-            document.getElementById('clearCartBtn').addEventListener('click', ()=>{
-              if(confirm('Xóa toàn bộ giỏ?')) { localStorage.removeItem(CART_KEY); refreshCartUI(); }
-            });
-            document.getElementById('confirmCartBtn').addEventListener('click', confirmCart);
-
-            // initial render
-            refreshCartUI();
-          });
-           
-        })();
-
-    </script>
-
-    <style>
-        /* nút cơ bản */
-        .btn {
-            padding: 6px 10px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            background: #fff;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background: #007bff;
-            color: #fff;
-            border: none;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: #fff;
-            border: none;
-        }
-
-        button.qty-inc, button.qty-dec {
-            padding: 2px 8px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            background: #f7f7f7;
-            cursor: pointer;
-        }
-
-        button.btn-remove {
-            background: transparent;
-            color: #c00;
-            border: none;
-            cursor: pointer;
-            font-size: 13px;
-        }
-    </style>
+    <script src="~/js/menu.js"></script>
 }

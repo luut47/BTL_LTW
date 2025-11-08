@@ -2,13 +2,15 @@
     ViewData["Title"] = "Trang chính - Nhà hàng mẫu";
 }
 
-<div style="max-width:1000px;margin:20px auto;font-family:Segoe UI, Roboto, Arial;">
-    <header style="display:flex;align-items:center;gap:16px;">
-        <img src="~/images/logo.jpg" alt="logo" style="width:120px;height:80px;object-fit:cover;border-radius:6px;">
-        <div style="flex:1;">
-            <h1 style="margin:0;">Nhà hàng BTL_LTW</h1>
-            <p style="margin:4px 0;color:#666;">Bữa ăn ngon - Tận tình phục vụ. Địa chỉ: 123 Đường ABC, Quận XYZ.</p>
-            <div style="margin-top:8px;">
+<div class="home-container">
+    <header class="home-header">
+        <img src="~/images/logo.jpg" alt="logo" class="home-logo" />
+        <div class="home-header-info">
+            <h1>Nhà hàng BTL_LTW</h1>
+            <p class="home-subtitle">
+                Bữa ăn ngon - Tận tình phục vụ. Địa chỉ: 123 Đường ABC, Quận XYZ.
+            </p>
+            <div class="home-header-actions">
                 <button id="btnReserve" type="button" class="btn btn-outline-primary">Đặt bàn trước</button>
                 <a class="btn btn-outline-secondary" href="tel:+84900000000">Gọi phục vụ</a>
                 <a class="btn btn-outline-secondary" href="mailto:contact@restaurant.example">Email</a>
@@ -18,31 +20,29 @@
         </div>
     </header>
 
-    <section style="margin-top:18px;display:flex;gap:18px;">
-        <div style="flex:1;">
+    <section class="home-main">
+        <div class="home-main-left">
             <h3>Trước khi xem Menu</h3>
             <p>Vui lòng nhập thông tin liên hệ để nhà hàng phục vụ đơn hàng và giao/thu tiền khi cần.</p>
 
-            <form id="custQuickForm" onsubmit="return false;" style="margin-top:10px;max-width:640px;">
-                <div style="display:flex;gap:8px;">
-                    <input id="custName" placeholder="Họ & tên" required style="flex:1;padding:8px;border:1px solid #ddd;border-radius:6px" />
-                    <input id="custPhone" placeholder="Số điện thoại" required style="width:220px;padding:8px;border:1px solid #ddd;border-radius:6px" />
+            <form id="custQuickForm" onsubmit="return false;" class="home-quick-form">
+                <div class="home-quick-form-row">
+                    <input id="custName" placeholder="Họ & tên" required class="form-control" />
+                    <input id="custPhone" placeholder="Số điện thoại" required class="form-control home-phone-input" />
                 </div>
-                <div style="margin-top:8px;">
-                    <input id="custAddress" placeholder="Địa chỉ (nếu giao - không bắt buộc)" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px" />
+                <div class="home-quick-form-row">
+                    <input id="custAddress" placeholder="Địa chỉ (nếu giao - không bắt buộc)" class="form-control" />
                 </div>
-                
 
-                <div style="margin-top:10px;">
-                    <!-- quan trọng: không phải submit -->
+                <div class="home-quick-form-actions">
                     <button id="goMenuBtn" type="button" class="btn btn-primary">Xem Menu & Đặt món</button>
                 </div>
-                <div style="margin-top:8px;color:#666;font-size:13px;">
+                <div class="home-quick-form-note">
                     Sau khi xác nhận món, đơn hàng sẽ gửi về bếp kèm mã đơn (token). Thông tin khách sẽ lưu để bộ phận thu ngân in hoá đơn.
                 </div>
             </form>
 
-            <h3 style="margin-top:18px;">Giới thiệu ngắn</h3>
+            <h3 class="home-section-title">Giới thiệu ngắn</h3>
             <p>Nhà hàng chúng tôi phục vụ đồ ăn Việt Nam & fusion, nguyên liệu tươi, đội ngũ bếp chuyên nghiệp. Mở cửa 8:00 - 22:00 hàng ngày.</p>
             <ul>
                 <li>Không gian ấm cúng, phù hợp gia đình & bạn bè.</li>
@@ -51,7 +51,7 @@
             </ul>
         </div>
 
-        <div style="width:320px;padding:12px;border:1px solid #eee;border-radius:6px;">
+        <div class="home-sidebar">
             <h4>Thông tin nhanh</h4>
             <p><strong>Địa chỉ:</strong> 123 Đường ABC, Quận XYZ</p>
             <p><strong>Giờ mở cửa:</strong> 08:00 - 22:00</p>
@@ -63,15 +63,14 @@
 </div>
 
 <!-- Modal đặt bàn -->
-<div id="reserveModal" style="display:none;position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;z-index:10000;">
-    <div style="background:#fff;padding:18px;border-radius:8px;max-width:520px;width:100%;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <h3 style="margin:0;">Đặt bàn trước</h3>
+<div id="reserveModal" class="reserve-modal">
+    <div class="reserve-modal-content">
+        <div class="reserve-modal-header">
+            <h3>Đặt bàn trước</h3>
             <button id="btnReserveCancel" type="button" class="btn btn-outline-secondary">Đóng</button>
         </div>
 
-        <!-- thêm id="reserveForm" để JS lấy được -->
-        <form id="reserveForm" method="post" action="/Reservation/Create" class="card p-3 my-3" style="max-width:520px;">
+        <form id="reserveForm" method="post" action="/Reservation/Create" class="card p-3 my-3 reserve-form">
             <div class="mb-2">
                 <input class="form-control" name="CustomerName" placeholder="Họ & tên" required />
             </div>
@@ -96,116 +95,10 @@
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        // tạo token ngắn (C-XXXXX)
-        function genToken(len = 5) {
-          const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-          let s = '';
-          for (let i = 0; i < len; i++) s += chars.charAt(Math.floor(Math.random() * chars.length));
-          return 'C-' + s;
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-          const modal = document.getElementById('reserveModal');
-          const btnOpen = document.getElementById('btnReserve');
-          const btnClose = document.getElementById('btnReserveCancel');
-          const btnWaiter = document.getElementById('btnWaiter');
-          if (btnOpen) btnOpen.addEventListener('click', () => modal.style.display = 'flex');
-          if (btnClose) btnClose.addEventListener('click', () => modal.style.display = 'none');
-          if(btnWaiter){
-              btnWaiter.addEventListener('click', ()=>{
-                  window.location.href ='/Staff';
-              });
-          }
-          
-          // ==== xử lý form đặt bàn qua fetch (đúng URL /Reservation/Create) ====
-          const form = document.getElementById('reserveForm');
-          if (form) {
-            // set mặc định datetime-local = now
-            const dt = form.querySelector('input[name="DateTime"]');
-            if (dt && !dt.value) {
-              const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-              dt.value = now.toISOString().slice(0,16);
-            }
-
-            form.addEventListener('submit', async (e) => {
-              e.preventDefault();
-              const fd = new FormData(form);
-              try {
-                const resp = await fetch('/Reservation/Create', { // <- singular
-                  method: 'POST',
-                  headers: { 'X-Requested-With':'XMLHttpRequest' },
-                  body: fd
-                });
-                if (!resp.ok) throw new Error(await resp.text() || 'Gửi thất bại');
-                const js = await resp.json();
-                alert('Đặt bàn thành công! Mã: ' + js.id);
-                modal.style.display = 'none';
-                form.reset();
-              } catch (err) {
-                alert('Lỗi: ' + (err?.message || err));
-              }
-            });
-          }
-
-          // ==== nút Xem Menu & Đặt món ====
-          const btnMenu = document.getElementById('goMenuBtn');
-          if (btnMenu) {
-            btnMenu.addEventListener('click', () => {
-              const name = document.getElementById('custName').value.trim();
-              const phone = document.getElementById('custPhone').value.trim();
-              const addr = document.getElementById('custAddress').value.trim();
-              if (!name || !phone) { alert('Vui lòng nhập tên và số điện thoại'); return; }
-              const token = genToken(5);
-              const customer = { name, phone, address: addr, token };
-              localStorage.setItem('customer', JSON.stringify(customer));
-              window.location.href = '/Menu';
-            });
-          }
-        });
-        
-    </script>
+@section Styles {
+    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
 }
 
-<style>
-    .form-group {
-        margin-bottom: 10px;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 6px 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
-
-    .btn {
-        padding: 6px 12px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    .btn-primary {
-        background: #007bff;
-        color: #fff;
-    }
-
-    .btn-outline-primary {
-        background: transparent;
-        border: 1px solid #007bff;
-        color: #007bff;
-    }
-
-    .btn-outline-secondary {
-        background: transparent;
-        border: 1px solid #6c757d;
-        color: #6c757d;
-    }
-
-    .btn-success {
-        background: #28a745;
-        color: #fff;
-    }
-</style>
+@section Scripts {
+    <script src="~/js/home.js" asp-append-version="true"></script>
+}

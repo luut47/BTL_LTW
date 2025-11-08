@@ -1,0 +1,149 @@
+﻿/* Layout chung cho trang Home Index */
+.home-container {
+    max-width: 1000px;
+    margin: 20px auto;
+    font-family: Segoe UI, Roboto, Arial, sans-serif;
+}
+
+/* Header */
+.home-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.home-logo {
+    width: 120px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.home-header-info h1 {
+    margin: 0;
+}
+
+.home-subtitle {
+    margin: 4px 0;
+    color: #666;
+}
+
+.home-header-actions {
+    margin-top: 8px;
+}
+
+/* Main section */
+.home-main {
+    margin-top: 18px;
+    display: flex;
+    gap: 18px;
+}
+
+.home-main-left {
+    flex: 1;
+}
+
+/* Quick form */
+.home-quick-form {
+    margin-top: 10px;
+    max-width: 640px;
+}
+
+.home-quick-form-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.home-phone-input {
+    max-width: 220px;
+}
+
+.home-quick-form-actions {
+    margin-top: 10px;
+}
+
+.home-quick-form-note {
+    margin-top: 8px;
+    color: #666;
+    font-size: 13px;
+}
+
+.home-section-title {
+    margin-top: 18px;
+}
+
+/* Sidebar */
+.home-sidebar {
+    width: 320px;
+    padding: 12px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+}
+
+/* Modal */
+.reserve-modal {
+    display: none; /* mặc định ẩn, JS sẽ set 'flex' */
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.4);
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.reserve-modal-content {
+    background: #fff;
+    padding: 18px;
+    border-radius: 8px;
+    max-width: 520px;
+    width: 100%;
+}
+
+.reserve-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+/* Form chung, có thể tái dùng hoặc giữ nguyên nếu bạn đã có site.css */
+.form-control {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: #fff;
+    border: none;
+}
+
+.btn-outline-primary {
+    background: transparent;
+    border: 1px solid #007bff;
+    color: #007bff;
+}
+
+.btn-outline-secondary {
+    background: transparent;
+    border: 1px solid #6c757d;
+    color: #6c757d;
+}
+
+.btn-success {
+    background: #28a745;
+    color: #fff;
+    border: none;
+}

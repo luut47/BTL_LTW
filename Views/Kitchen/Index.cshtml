@@ -2,37 +2,16 @@
     ViewData["Title"] = "Kitchen";
 }
 
+<h2>Kitchen</h2>
 
-<h2>Kitchen - Orders</h2>
-<div id="kitchen-root">Loading...</div>
+<div id="kitchen-root">
+    Đang tải đơn...
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/kitchen.css" />
+}
 
 @section Scripts {
-        
-    <script>
-        function reloadKitchen() {
-          fetch('/Kitchen/ListPartial', { headers: { 'X-Requested-With':'XMLHttpRequest' } })
-            .then(r => r.text())
-            .then(html => {
-              const root = document.getElementById('kitchen-root');
-              if (root) root.innerHTML = html;
-            })
-            .catch(err => console.error('reloadKitchen error', err));
-        }
-
-        reloadKitchen();
-        setInterval(reloadKitchen, 5000);
-
-        async function updateStatus(orderId, menuItemId, status){
-          const url = `/Orders/UpdateItemStatus?orderId=${orderId}&menuItemId=${menuItemId}&status=${status}`;
-          const r = await fetch(url, { method: 'PATCH' });
-          if (r.ok) {
-            reloadKitchen();
-          } else {
-            const txt = await r.text();
-            alert('Lỗi: ' + txt);
-          }
-        }
-
-        window.updateStatus = updateStatus;
-    </script>
+    <script src="~/js/kitchen.js"></script>
 }

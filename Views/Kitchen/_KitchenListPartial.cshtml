@@ -2,53 +2,34 @@
 
 @if (Model == null || !Model.Any())
 {
-    <div class="text-muted">Không có order nào đang xử lý.</div>
+    <div class="kitchen-empty">Không có đơn nào.</div>
 }
 else
 {
-    @foreach (var o in Model.OrderByDescending(x => x.CreatedAt))
-    {
-        <div style="border:1px solid #ccc;padding:8px;margin-bottom:10px;">
-            <div>
-                <strong>Order:</strong> @o.Id
-                &nbsp; - &nbsp; <strong>Mã đơn:</strong> @o.TableToken
-                &nbsp; - &nbsp; <strong>@o.Status</strong>
-                @if ((bool)(o?.IsTakeAway ?? o?.IsTakeAway ?? false))
-                {
-                    <span class="badge bg-info text-dark" style="font-weight:600;">Mang về</span>
-                }
-            </div>
-            <div>Created: @o.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</div>
-
-            <ul style="margin-top:6px;">
-                @foreach (var it in o.Items)
-                {
-                    <li style="margin:6px 0;">
-                        @it.MenuItemName - x@it.Qty -
-                        <span id="status-@o.Id-@it.MenuItemId">@it.Status</span>
-                        <button onclick="updateStatus('@o.Id', @it.MenuItemId, 'Preparing')">Start</button>
-                        <button onclick="updateStatus('@o.Id', @it.MenuItemId, 'Served')">Done</button>
-
-                        <!-- progress bar nhỏ -->
-                        @{
-                            var pct = it.Status.ToString() switch
-                            {
-                                "Pending" => 25,
-                                "Preparing" => 50,
-                                "Ready" => 75,
-                                "Served" => 100,
-                                "Cancelled" => 100,
-                                _ => 0
-                            };
+    <div class="kitchen-list">
+        @foreach (var o in Model)
+        {
+            <div class="kitchen-order" data-id="@o.Id">
+                <div class="kitchen-order-header">
+                    <span><strong>Mã:</strong> @o.TableToken</span>
+                    <span><strong>Trạng thái:</strong> @o.Status</span>
+                </div>
+                <div class="kitchen-order-body">
+                    <div>Khách: @o.CustomerName - @o.CustomerPhone</div>
+                    <ul>
+                        @foreach (var it in o.Items)
+                        {
+                            <li>@it.MenuItemName - @it.Qty</li>
                         }
-                        <div class="progress" style="height:6px;max-width:260px;margin-top:4px;">
-                            <div class="progress-bar" role="progressbar" style="width:@pct%"></div>
-                        </div>
-                    </li>
-                }
-            </ul>
-        </div>
- 
-    }
+                    </ul>
+                </div>
+                <div class="kitchen-order-actions">
+                    @* Ví dụ các nút bếp đang dùng *@
+                    <button class="btn-kitchen btn-start" data-id="@o.Id">Bắt đầu</button>
+                    <button class="btn-kitchen btn-done" data-id="@o.Id">Done</button>
+                    <button class="btn-kitchen btn-cancel" data-id="@o.Id">Hủy</button>
+                </div>
+            </div>
+        }
+    </div>
 }
-
