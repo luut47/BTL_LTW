@@ -116,29 +116,76 @@ namespace BTL_LTW.Controllers
             var o = _db.Orders.FirstOrDefault(x => x.Id == id);
             if (o == null) return NotFound();
 
+            // Đánh dấu order đã hoàn tất
             o.IsCompleted = true;
             o.Status = "Completed";
 
+            // Sẽ cố gắng tìm BẤT KỲ bàn nào đang gắn với order hoặc reservation liên quan
+            TableInfo? table = null;
+
+            // 1. Nếu order có AssignedTable -> ưu tiên dùng
             if (!string.IsNullOrEmpty(o.AssignedTable))
             {
-                var table = _db.TableInfos.FirstOrDefault(t => t.Id == o.AssignedTable);
-                if (table != null)
-                {
-                    table.IsOccuped = false;
-                    table.OccupiedById = null;
-                    table.Since = null;
-                }
-
+                table = _db.TableInfos.FirstOrDefault(t => t.Id == o.AssignedTable);
                 o.AssignedTable = null;
+            }
+
+            // 2. Nếu order có ReservationId -> giải phóng luôn bàn ở Reservation (nếu có)
+            if (!string.IsNullOrEmpty(o.ReservationId))
+            {
+                var res = _db.Reservations.FirstOrDefault(r => r.Id == o.ReservationId);
+                if (res != null)
+                {
+                    if (!string.IsNullOrEmpty(res.AssignedTable))
+                    {
+                        // nếu ở bước (1) chưa tìm được table thì lấy theo reservation
+                        if (table == null)
+                            table = _db.TableInfos.FirstOrDefault(t => t.Id == res.AssignedTable);
+
+                        res.AssignedTable = null;
+                    }
+
+                    // nếu bạn có LinkOrderId thì có thể clear luôn:
+                    //if (res.LinkOrderId == o.Id)
+                    //    res.LinkOrderId = null;
+                }
+            }
+
+            // 3. Thực sự giải phóng bàn trong TableInfo
+            if (table != null)
+            {
+                table.IsOccuped = false;
+                table.OccupiedById = null;
+                table.Since = null;
             }
 
             _db.SaveChanges();
 
+            // Điều hướng về đúng trang gọi
             if (!string.IsNullOrEmpty(returnTo) && returnTo == "reservations")
                 return RedirectToAction("Reservations");
 
             return RedirectToAction("Index");
         }
+
+        [HttpGet]
+        public IActionResult OrdersPartial()
+        {
+            if (!IsAuthenticated())
+                return Unauthorized();
+
+            var orders = _db.Orders
+                .Where(o => string.IsNullOrEmpty(o.ReservationId))
+                .OrderByDescending(o => o.CreatedAt)
+                .Include(o => o.Items)
+                .ToList();
+
+            var tables = _db.TableInfos.ToList();
+            ViewBag.Tables = tables;
+
+            return PartialView("_OrdersPartial", orders);
+        }
+
         [HttpPost]
         public IActionResult DeleteOrder(string id, string? returnTo)
         {

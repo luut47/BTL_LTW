@@ -1,0 +1,123 @@
+﻿@model List<BTL_LTW.Models.Order>
+@using BTL_LTW.Models
+
+@{
+    var tables = ViewBag.Tables as List<TableInfo>;
+    var totalTables = tables?.Count ?? 0;
+    var occupiedCount = tables?.Count(t => t.IsOccuped) ?? 0;
+    var freeCount = totalTables - occupiedCount;
+}
+
+<div style="display:flex;gap:18px;">
+    <div style="flex:1;">
+        <h3>Orders (mới nhất)</h3>
+
+        @foreach (var o in Model)
+        {
+            var statusLower = (o.Status ?? "").ToLowerInvariant();
+
+            <div style="border:1px solid #ddd;padding:10px;margin-bottom:8px;">
+                <div>
+                    <strong>Order:</strong> @o.Id &nbsp;
+                    <strong>Mã:</strong> @o.TableToken &nbsp;
+                    <strong>Trạng thái:</strong> @o.Status
+                </div>
+                <div>Khách: @o.CustomerName - @o.CustomerPhone</div>
+                <div>Địa chỉ: @o.CustomerAddress</div>
+                <div>Thời gian: @o.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</div>
+
+                <div>
+                    <ul>
+                        @foreach (var it in o.Items)
+                        {
+                            <li>@it.MenuItemName - x@it.Qty - @it.UnitPrice.ToString("N0")</li>
+                        }
+                    </ul>
+                </div>
+                <div><strong>Tổng:</strong> @o.Total.ToString("N0") VND</div>
+
+                <div class="mt-2">
+                    @* Badge trạng thái *@
+                    @if (o.IsTakeAway)
+                    {
+                        <span class="badge bg-info me-2">Mang về</span>
+                    }
+                    else if (!string.IsNullOrEmpty(o.AssignedTable))
+                    {
+                        <span class="badge bg-success me-2">Bàn: @o.AssignedTable</span>
+                    }
+
+                    @* Gán bàn *@
+                    @if (tables == null || tables.Count == 0)
+                    {
+                        <span class="text-danger">Chưa cấu hình bàn</span>
+                    }
+                    else if (!o.IsTakeAway && string.IsNullOrEmpty(o.AssignedTable) && !o.IsCompleted)
+                    {
+                        var freeTables = tables.Where(t => !t.IsOccuped).ToList();
+                        if (freeTables.Any())
+                        {
+                            <form method="post" action="/Staff/AssignTable" class="d-inline">
+                                <input type="hidden" name="orderId" value="@o.Id" />
+                                <select name="tableId" class="form-select form-select-sm d-inline-block" style="width:auto;">
+                                    @foreach (var t in freeTables)
+                                    {
+                                        <option value="@t.Id">@t.Id</option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-primary">Gán bàn</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="text-danger">Hết bàn trống</span>
+                        }
+                    }
+
+                    @* Giải phóng bàn *@
+                    @if (!string.IsNullOrEmpty(o.AssignedTable))
+                    {
+                        <form method="post"
+                              asp-controller="Staff"
+                              asp-action="ReleaseTableOrder"
+                              class="d-inline ms-2">
+                            <input type="hidden" name="orderId" value="@o.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                Giải phóng bàn @o.AssignedTable
+                            </button>
+                        </form>
+                    }
+
+                    <a class="btn btn-sm btn-outline-secondary ms-2" href="/Staff/PrintBill?id=@o.Id" target="_blank">In bill</a>
+
+                    @* Hoàn tất *@
+                    @if (!o.IsCompleted)
+                    {
+                        <form method="post"
+                              asp-controller="Staff"
+                              asp-action="CompletedOrder"
+                              class="d-inline ms-2">
+                            <input type="hidden" name="id" value="@o.Id" />
+                            <button type="submit" class="btn btn-sm btn-success">Hoàn tất</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div style="width:320px;">
+        <h3>Danh sách bàn</h3>
+        <div class="text-muted mb-2">
+            Bàn đang dùng: <strong>@occupiedCount</strong> / @totalTables • Bàn trống: <strong>@freeCount</strong>
+        </div>
+        <ul>
+            @foreach (var t in tables)
+            {
+                <li>
+                    <strong>@t.Id</strong> - @(t.IsOccuped ? $"Đang dùng (order {t.OccupiedById})" : "Trống")
+                </li>
+            }
+        </ul>
+    </div>
+</div>

@@ -1,4 +1,6 @@
 ﻿(function () {
+    setInterval(reloadResv, 100);
+
     const btnKitchen = document.getElementById('btnKitchen');
     if (btnKitchen) {
         btnKitchen.addEventListener('click', () => {
@@ -46,7 +48,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         // Lần đầu + 8s/lần
         reloadResv();
-        setInterval(reloadResv, 8000);
+        //setInterval(reloadResv, 100);
 
         // Event delegation cho nút "Chọn đồ"
         document.addEventListener('click', handleChooseFoodClick);
