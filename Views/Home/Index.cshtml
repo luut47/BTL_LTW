@@ -32,7 +32,10 @@
                            class="form-control"
                            required
                            minlength="3"
-                           maxlength="100" />
+                           maxlength="100" 
+                           pattern="^[\p{L}\s]+$"
+                           title="Họ tên chỉ chứa chữ cái và khoảng trắng." 
+                           />
                     <input id="custPhone"
                            type="tel"
                            placeholder="Số điện thoại"
@@ -88,7 +91,10 @@
                        placeholder="Họ & tên"
                        required
                        minlength="3"
-                       maxlength="100" />
+                       maxlength="100" 
+                       pattern="^[\p{L}\s]+$"
+                       title="Họ tên chỉ chứa chữ cái và khoảng trắng." 
+                       />
             </div>
             <div class="mb-2">
                 <input class="form-control"
