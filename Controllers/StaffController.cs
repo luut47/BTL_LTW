@@ -139,6 +139,59 @@ namespace BTL_LTW.Controllers
 
             return RedirectToAction("Index");
         }
+        [HttpPost]
+        public IActionResult DeleteOrder(string id, string? returnTo)
+        {
+            if (!IsAuthenticated())
+                return RedirectToAction(nameof(Login));
+
+            if (string.IsNullOrWhiteSpace(id))
+                return RedirectToAction(nameof(Index));
+
+            // load kèm Items để xóa
+            var order = _db.Orders
+                           .Include(o => o.Items)
+                           .FirstOrDefault(o => o.Id == id);
+            if (order == null)
+                return RedirectToAction(nameof(Index));
+
+            // 1. Giải phóng bàn nếu order đang giữ bàn
+            if (!string.IsNullOrEmpty(order.AssignedTable))
+            {
+                var table = _db.TableInfos.FirstOrDefault(t => t.Id == order.AssignedTable);
+                if (table != null && table.OccupiedById == order.Id)
+                {
+                    table.IsOccuped = false;
+                    table.OccupiedById = null;
+                    table.Since = null;
+                }
+                order.AssignedTable = null;
+            }
+
+            // 2. Nếu có gắn với Reservation thì bỏ link
+            if (!string.IsNullOrEmpty(order.ReservationId))
+            {
+                var res = _db.Reservations.FirstOrDefault(r => r.Id == order.ReservationId);
+                if (res != null && res.LinkOrderId == order.Id)
+                {
+                    res.LinkOrderId = null;
+                }
+            }
+
+            // 3. Xóa OrderItems rồi xóa Order
+            if (order.Items != null && order.Items.Count > 0)
+            {
+                _db.OrderItems.RemoveRange(order.Items);
+            }
+            _db.Orders.Remove(order);
+
+            _db.SaveChanges();
+
+            if (!string.IsNullOrEmpty(returnTo) && returnTo == "reservations")
+                return RedirectToAction(nameof(Reservations));
+
+            return RedirectToAction(nameof(Index));
+        }
 
         // ================== PAYMENT ==================
         [HttpPost]

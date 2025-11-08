@@ -117,8 +117,12 @@
             </tr>
 
             @* ===== HÀNG CHI TIẾT ORDER (NẾU CÓ) ===== *@
+
+
             @if (order != null)
             {
+                    var statusText = (order.Status ?? "").ToLowerInvariant();
+                    var isCancelled = statusText.Contains("cancel");
                 <tr>
                     <td colspan="7" style="background:#fafafa;">
                         <div style="font-weight:600;">Order của bàn đặt này:</div>
@@ -128,16 +132,35 @@
                         <ul>
                             @foreach (var it in order.Items)
                             {
-                                <li>@it.MenuItemName - @it.Qty - @it.UnitPrice.ToString("N0")</li>
+                                <li>@it.MenuItemName - x@it.Qty - @it.UnitPrice.ToString("N0")</li>
                             }
                         </ul>
                         <div><strong>Tổng:</strong> @order.Total.ToString("N0") VND</div>
-                        <a class="btn btn-sm btn-outline-secondary" target="_blank" href="/Staff/PrintBill?id=@order.Id">In bill</a>
+                        <a class="btn btn-sm btn-outline-secondary"
+                           target="_blank"
+                           href="/Staff/PrintBill?id=@order.Id">In bill</a>
 
-                        @* NÚT HOÀN TẤT: chỉ hiện khi order đã Closed nhưng CHƯA Completed *@
-                        @if (!order.IsCompleted && isClosed)
+                        @if (!order.IsCompleted && isCancelled)
                         {
-                            <form method="post" action="/Staff/CompletedOrder" class="d-inline ms-2">
+                            @* Đơn đã bị bếp hủy -> cho phép XÓA hẳn *@
+                            <form asp-controller="Staff"
+                                  asp-action="DeleteOrder"
+                                  method="post"
+                                  class="d-inline ms-2"
+                                  onsubmit="return confirm('Xóa hẳn đơn này khỏi hệ thống?');">
+                                <input type="hidden" name="id" value="@order.Id" />
+                                <input type="hidden" name="returnTo" value="reservations" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    Xóa đơn (bếp hủy)
+                                </button>
+                            </form>
+                        }
+                        else if (!order.IsCompleted)
+                        {
+                            <form method="post"
+                                  asp-controller="Staff"
+                                  asp-action="CompletedOrder"
+                                  class="d-inline ms-2">
                                 <input type="hidden" name="id" value="@order.Id" />
                                 <input type="hidden" name="returnTo" value="reservations" />
                                 <button type="submit" class="btn btn-sm btn-success">Hoàn tất</button>

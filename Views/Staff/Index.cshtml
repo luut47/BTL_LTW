@@ -99,12 +99,29 @@
                     <a class="btn btn-sm btn-outline-secondary ms-2" href="/Staff/PrintBill?id=@o.Id" target="_blank">In bill</a>
 
                     @{
-                        var statusLower = (o.Status ?? "").ToLower();
+                        var statusLower = (o.Status ?? "").ToLowerInvariant();
                     }
 
-                    @if (!o.IsCompleted)
+                    @if (!o.IsCompleted && statusLower.Contains("cancel"))
                     {
-                        <form method="post" action="/Staff/CompletedOrder" class="d-inline ms-2">
+                        <form asp-controller="Staff"
+                              asp-action="DeleteOrder"
+                              method="post"
+                              class="d-inline ms-2"
+                              onsubmit="return confirm('Xóa hẳn đơn này khỏi hệ thống?');">
+                            <input type="hidden" name="id" value="@o.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                Xóa đơn (bếp hủy)
+                            </button>
+                        </form>
+                    }
+                    else if (!o.IsCompleted)
+                    {
+                        @* Các trạng thái bình thường -> vẫn Hoàn tất *@
+                        <form method="post"
+                              asp-controller="Staff"
+                              asp-action="CompletedOrder"
+                              class="d-inline ms-2">
                             <input type="hidden" name="id" value="@o.Id" />
                             <button type="submit" class="btn btn-sm btn-success">Hoàn tất</button>
                         </form>
