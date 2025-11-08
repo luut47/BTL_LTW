@@ -37,6 +37,11 @@ namespace BTL_LTW.Controllers
             if (dto == null || dto.Items == null || !dto.Items.Any())
                 return BadRequest("Chưa order gì");
 
+            if (!TryValidateModel(dto))
+            {
+                return BadRequest(ModelState);
+            }
+
             try
             {
                 // nếu body có ReservationId thì ưu tiên

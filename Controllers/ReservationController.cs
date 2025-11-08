@@ -22,11 +22,18 @@ namespace BTL_LTW.Controllers
             if (model == null)
                 return BadRequest("Dữ liệu rỗng");
 
-            if (string.IsNullOrWhiteSpace(model.CustomerName) || string.IsNullOrWhiteSpace(model.Phone))
-                return BadRequest("Vui lòng nhập tên và số điện thoại.");
+            //if (string.IsNullOrWhiteSpace(model.CustomerName) || string.IsNullOrWhiteSpace(model.Phone))
+            //    return BadRequest("Vui lòng nhập tên và số điện thoại.");
 
             if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                                       .SelectMany(v => v.Errors)
+                                       .Select(e => e.ErrorMessage)
+                                       .ToList();
+
                 return BadRequest(ModelState);
+            }
 
             model.Id = Guid.NewGuid().ToString();
             model.CreatedAt = DateTime.UtcNow; 

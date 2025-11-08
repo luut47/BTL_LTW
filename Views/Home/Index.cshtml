@@ -27,8 +27,19 @@
 
             <form id="custQuickForm" onsubmit="return false;" class="home-quick-form">
                 <div class="home-quick-form-row">
-                    <input id="custName" placeholder="Họ & tên" required class="form-control" />
-                    <input id="custPhone" placeholder="Số điện thoại" required class="form-control home-phone-input" />
+                    <input id="custName"
+                           placeholder="Họ & tên"
+                           class="form-control"
+                           required
+                           minlength="3"
+                           maxlength="100" />
+                    <input id="custPhone"
+                           type="tel"
+                           placeholder="Số điện thoại"
+                           class="form-control home-phone-input"
+                           required
+                           pattern="^0\d{9}$"
+                           title="Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0." />
                 </div>
                 <div class="home-quick-form-row">
                     <input id="custAddress" placeholder="Địa chỉ (nếu giao - không bắt buộc)" class="form-control" />
@@ -72,10 +83,21 @@
 
         <form id="reserveForm" method="post" action="/Reservation/Create" class="card p-3 my-3 reserve-form">
             <div class="mb-2">
-                <input class="form-control" name="CustomerName" placeholder="Họ & tên" required />
+                <input class="form-control"
+                       name="CustomerName"
+                       placeholder="Họ & tên"
+                       required
+                       minlength="3"
+                       maxlength="100" />
             </div>
             <div class="mb-2">
-                <input class="form-control" name="Phone" placeholder="Số điện thoại" required />
+                <input class="form-control"
+                       type="tel"
+                       name="Phone"
+                       placeholder="Số điện thoại"
+                       required
+                       pattern="^0\d{9}$"
+                       title="Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0." />
             </div>
             <div class="mb-2">
                 <input class="form-control" name="Email" placeholder="Email (không bắt buộc)" />

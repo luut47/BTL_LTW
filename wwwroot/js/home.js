@@ -30,19 +30,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==== xử lý form đặt bàn qua fetch (đúng URL /Reservation/Create) ====
-    const form = document.getElementById('reserveForm');
-    if (form) {
-        const dt = form.querySelector('input[name="DateTime"]');
+    // ==== xử lý form đặt bàn qua fetch (Reservation/Create) ====
+    const formReserve = document.getElementById('reserveForm');
+    if (formReserve) {
+        const dt = formReserve.querySelector('input[name="DateTime"]');
         if (dt && !dt.value) {
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             dt.value = now.toISOString().slice(0, 16);
         }
 
-        form.addEventListener('submit', async (e) => {
+        formReserve.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const fd = new FormData(form);
+
+            // HTML5 validation cho form đặt bàn
+            if (!formReserve.reportValidity()) {
+                return;
+            }
+
+            const fd = new FormData(formReserve);
             try {
                 const resp = await fetch('/Reservation/Create', {
                     method: 'POST',
@@ -54,23 +60,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 const js = await resp.json();
                 alert('Đặt bàn thành công! Mã: ' + js.id);
                 if (modal) modal.style.display = 'none';
-                form.reset();
+                formReserve.reset();
             } catch (err) {
                 alert('Lỗi: ' + (err?.message || err));
             }
         });
     }
 
-    // ==== nút Xem Menu & Đặt món ====
+    // ==== nút Xem Menu & Đặt món (Order bình thường) ====
     const btnMenu = document.getElementById('goMenuBtn');
-    if (btnMenu) {
+    const quickForm = document.getElementById('custQuickForm');
+
+    if (btnMenu && quickForm) {
         btnMenu.addEventListener('click', () => {
+            // RẤT QUAN TRỌNG: chạy HTML5 validation trên form nhanh
+            if (!quickForm.reportValidity()) {
+                // Nếu có field sai (required/pattern), browser sẽ highlight và không cho đi tiếp
+                return;
+            }
+
             const name = document.getElementById('custName').value.trim();
             const phone = document.getElementById('custPhone').value.trim();
             const addr = document.getElementById('custAddress').value.trim();
 
-            if (!name || !phone) {
-                alert('Vui lòng nhập tên và số điện thoại');
+
+            // (Optional) backup check JS, phòng khi browser cũ không hỗ trợ pattern
+            const nameRegex = /^[\p{L}\s]+$/u;
+            if (!nameRegex.test(name)) {
+                alert('Tên chỉ được bao gồm chữ cái và khoảng trắng.');
+                return;
+            }
+
+            const phoneRegex = /^0\d{9}$/;
+            if (!phoneRegex.test(phone)) {
+                alert('Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0.');
                 return;
             }
 
