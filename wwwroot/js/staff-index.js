@@ -1,6 +1,9 @@
 ﻿// wwwroot/js/staff-index.js
 (function () {
+    let reloading = false;
+    setInterval(reloadOrders, 5000);
     function reloadOrders() {
+        if (reloading) return;
         fetch('/Staff/OrdersPartial', {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
@@ -16,6 +19,6 @@
         // lần đầu
         reloadOrders();
         // sau đó 5s/lần (tùy bạn chỉnh)
-        setInterval(reloadOrders, 100);
+        
     });
 })();

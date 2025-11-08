@@ -3,7 +3,7 @@ namespace BTL_LTW.Models
 {
     public class Reservation
     {
-        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public string? Id { get; set; } = Guid.NewGuid().ToString();
         [Required(ErrorMessage = "Vui lòng nhập họ tên.")]
         [StringLength(100, ErrorMessage = "Họ tên tối đa 100 ký tự.")]
         [RegularExpression(@"^[\p{L}\s]+$", ErrorMessage = "Họ tên chỉ chứa chữ cái và khoảng trắng.")]

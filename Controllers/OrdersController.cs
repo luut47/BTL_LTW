@@ -34,73 +34,69 @@ namespace BTL_LTW.Controllers
         [HttpPost]
         public IActionResult Create([FromBody] Order? dto, [FromQuery] string? reservationId)
         {
-            if (dto == null || dto.Items == null || !dto.Items.Any())
-                return BadRequest("Chưa order gì");
+            if (dto == null)
+                return BadRequest("Body rỗng.");
 
-            if (!TryValidateModel(dto))
+            ModelState.Remove(nameof(Order.Id));
+
+            if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                var errors = ModelState.Values
+                                       .SelectMany(v => v.Errors)
+                                       .Select(e => e.ErrorMessage)
+                                       .ToList();
+
+                return BadRequest(new { success = false, errors });
             }
 
-            try
+            // ===== Tính tiền, gán Id, status, v.v. =====
+            var menuDict = _db.MenuItems.ToDictionary(m => m.Id, m => m);
+            decimal total = 0m;
+
+            foreach (var it in dto.Items)
             {
-                // nếu body có ReservationId thì ưu tiên
-                if (!string.IsNullOrWhiteSpace(dto.ReservationId))
-                    reservationId = dto.ReservationId;
+                if (!menuDict.TryGetValue(it.MenuItemId, out var mi))
+                    return BadRequest($"Menu item không tồn tại (id={it.MenuItemId})");
 
-                // Lấy menu từ DB 
-                var menuDict = _db.MenuItems.ToDictionary(m => m.Id, m => m);
+                it.MenuItemName = mi.Name;
+                it.UnitPrice = mi.Price;
+                if (it.Qty <= 0) it.Qty = 1;
 
-                decimal total = 0m;
+                total += it.UnitPrice * it.Qty;
+            }
 
-                // Validate + gán giá / tên món server-side (chống sửa giá từ client)
-                foreach (var it in dto.Items)
+            dto.Total = total;
+            dto.Id = Guid.NewGuid().ToString();  // ⬅ server tự tạo Id ở đây
+            dto.CreatedAt = DateTime.UtcNow;
+            dto.Status = "Pending";
+            dto.IsCompleted = false;
+
+            // Nếu order này gắn với reservation
+            if (!string.IsNullOrWhiteSpace(dto.ReservationId))
+                reservationId = dto.ReservationId;
+
+            if (!string.IsNullOrWhiteSpace(reservationId))
+            {
+                dto.ReservationId = reservationId;
+                var r = _db.Reservations.FirstOrDefault(x => x.Id == reservationId);
+                if (r != null)
                 {
-                    if (!menuDict.TryGetValue(it.MenuItemId, out var mi))
-                        return BadRequest($"Menu item không tồn tại (id={it.MenuItemId})");
+                    r.LinkOrderId = dto.Id;
 
-                    it.MenuItemName = mi.Name;
-                    it.UnitPrice = mi.Price;
-                    if (it.Qty <= 0) it.Qty = 1;
-
-                    total += it.UnitPrice * it.Qty;
-                }
-
-                dto.Total = total;
-                dto.Id = Guid.NewGuid().ToString();
-                dto.CreatedAt = DateTime.UtcNow;
-                dto.Status = "Pending";
-                dto.IsCompleted = false;
-
-                // Nếu gắn với Reservation
-                if (!string.IsNullOrWhiteSpace(reservationId))
-                {
-                    dto.ReservationId = reservationId;
-
-                    var r = _db.Reservations.FirstOrDefault(x => x.Id == reservationId);
-                    if (r != null)
+                    if (!string.IsNullOrWhiteSpace(r.AssignedTable) &&
+                        string.IsNullOrWhiteSpace(dto.AssignedTable))
                     {
-                        // Link Order với Reservation
-                        r.LinkOrderId = dto.Id;
-
-                        // Nếu reservation đã có bàn -> gán luôn vào order
-                        if (!string.IsNullOrWhiteSpace(r.AssignedTable) && string.IsNullOrWhiteSpace(dto.AssignedTable))
-                        {
-                            dto.AssignedTable = r.AssignedTable;
-                        }
+                        dto.AssignedTable = r.AssignedTable;
                     }
                 }
-
-                _db.Orders.Add(dto);
-                _db.SaveChanges();
-
-                return CreatedAtAction(nameof(Get), new { id = dto.Id }, dto);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+
+            _db.Orders.Add(dto);
+            _db.SaveChanges();
+
+            return Ok(new { success = true, id = dto.Id });
         }
+
 
 
         [HttpPatch]
